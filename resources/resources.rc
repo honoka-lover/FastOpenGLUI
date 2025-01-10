@@ -1,0 +1,11 @@
+#include "../src/resources.h"
+
+IDR_BACKGROUND IMAGE "images/background.png"
+IDR_CLOSEPNG IMAGE "images/close.png"
+IDR_MINIMIZEPNG IMAGE "images/hide.png"
+IDR_CLOSEHOVERPNG IMAGE "images/close1.png"
+IDR_MINIMIZEHOVERPNG IMAGE "images/hide1.png"
+
+IDI_ICON1 ICON "images/blueScreen.ico"
+
+RES_DATA 7Z "res.7z"
