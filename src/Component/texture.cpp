@@ -8,7 +8,7 @@
 ******************************************************************/
 #include <iostream>
 
-#include "texture.h"
+#include "FOGL/texture.h"
 
 
 Texture2D::Texture2D()

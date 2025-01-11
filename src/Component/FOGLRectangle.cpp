@@ -1,6 +1,5 @@
 ﻿#include "glad/glad.h"
 #include "FOGLRectangle.h"
-#include "MainWindow.h"
 #include <stb_image.h>
 
 // 顶点着色器源码
@@ -90,8 +89,8 @@ void main() {
 )";
 
 
-FOGLRectangle::FOGLRectangle(float x, float y, float width, float height, float radius, glm::vec4 color, MainWindow *window)
-    : x(x), y(y), width(width), height(height), radius(radius), color(color), windowHeight(window->getHeight()), windowWidth(window->getWidth())
+FOGLRectangle::FOGLRectangle(float x, float y, float width, float height, float radius, glm::vec4 color, float parentWidth,float parentHeight)
+    : x(x), y(y), width(width), height(height), radius(radius), color(color), windowHeight(parentHeight), windowWidth(parentWidth)
 {
 
     // 编译着色器

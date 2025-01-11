@@ -13,7 +13,6 @@
 #include FT_FREETYPE_H
 
 #include "text_renderer.h"
-// #include "resource_manager.h"
 
 // 顶点着色器源码
 static const char *vertexShaderSource = R"(
