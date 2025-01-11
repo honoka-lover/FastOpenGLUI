@@ -6,8 +6,9 @@
 #include <fstream>
 #include "InstallResources.h"
 #include "filesystem"
-#include "FastOpenGLUI/soft_info.h"
+#include "soft_info.h"
 #include "InstallResources.h"
+#include "regeditFunction.h"
 namespace fs = std::filesystem;
 
 // 顶点着色器源码
@@ -191,6 +192,7 @@ void InstallWindow::extractRes(std::filesystem::path extractPath)
                 std::cout << "Callback called with value: " << value << std::endl;
             };
             Extract7zResourceWithProgress(RES_DATA,extractPath, MyCallback);
+            WriteInstallData(installPath);
         } catch (...) {
             // 捕获所有异常，避免未处理的崩溃
         }

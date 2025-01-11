@@ -33,4 +33,6 @@ std::filesystem::path selectFolderUsingIFileDialog(const std::filesystem::path& 
 void loadTexture(const std::string &path, GLuint &textureID);
 void loadTextureFromResource(int resourceID, GLuint &textureID);
 
+// UTF-8 转 GB2312
+std::string UTF8ToGB2312(const std::string& utf8Str);
 #endif //FASTOPENGLUI_COMMONFUNC_H

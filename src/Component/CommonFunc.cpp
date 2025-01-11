@@ -5,7 +5,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "CommonFunc.h"
-
+#include "string"
 #include "archive_entry.h"
 #include "archive.h"
 #include "iostream"
@@ -194,6 +194,8 @@ void Extract7zResourceWithProgress(int resourcesId,const fs::path& outPath,const
     cacheFile.close();
     std::cout << "Cache file written: " << tempFilePath << std::endl;
 
+    if(!exists(outPath))
+        create_directories(outPath);
     extract_7z(tempFilePath, outPath,callback);
 
     // 删除缓存文件
@@ -354,4 +356,25 @@ void loadTextureFromResource(int resourceID, GLuint &textureID)
 
     // 释放图像数据
     stbi_image_free(data);
+}
+
+// UTF-8 转 GB2312
+std::string UTF8ToGB2312(const std::string& utf8Str) {
+    // UTF-8 转 WideChar
+    int wideCharSize = MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, nullptr, 0);
+    if (wideCharSize <= 0) {
+        throw std::runtime_error("Failed to convert UTF-8 to WideChar");
+    }
+    std::wstring wideStr(wideCharSize, 0);
+    MultiByteToWideChar(CP_UTF8, 0, utf8Str.c_str(), -1, &wideStr[0], wideCharSize);
+
+    // WideChar 转 GB2312
+    int gb2312Size = WideCharToMultiByte(936, 0, wideStr.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    if (gb2312Size <= 0) {
+        throw std::runtime_error("Failed to convert WideChar to GB2312");
+    }
+    std::string gb2312Str(gb2312Size, 0);
+    WideCharToMultiByte(936, 0, wideStr.c_str(), -1, &gb2312Str[0], gb2312Size, nullptr, nullptr);
+
+    return gb2312Str;
 }

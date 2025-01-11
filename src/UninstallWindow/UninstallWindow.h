@@ -33,4 +33,5 @@ private:
     void initButton();
 };
 
+void deleteSelf();
 #endif

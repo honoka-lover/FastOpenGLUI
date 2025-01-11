@@ -121,7 +121,7 @@ void TextRenderer::RenderText(std::wstring text, float x, float y, float scale, 
         CharacterData ch;
 
         // 如果字符不存在于缓存中，加载并缓存
-        if (!characters.contains(id))
+        if (characters.find(id) == characters.end())
         {
             if (FT_Load_Char(face, *c, FT_LOAD_RENDER))
             {

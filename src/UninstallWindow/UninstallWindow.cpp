@@ -4,10 +4,13 @@
 #include <chrono>
 #include <thread>
 #include <fstream>
+#include <ShlObj_core.h>
 #include "UninstallResources.h"
 #include "filesystem"
 #include "FastOpenGLUI/soft_info.h"
 #include "UninstallResources.h"
+#include "regeditFunction.h"
+#include "shellapi.h"
 namespace fs = std::filesystem;
 
 // 顶点着色器源码
@@ -110,6 +113,19 @@ void UninstallWindow::handleMouse()
         {
             closeButton->isHovered = true;
         }
+    }else if(insideFOGLRectangle(uninstallButton)){
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+        {
+            static int i=0;
+            if(i == 0) {
+                i++;
+                DeleteInstallData();
+            }
+        }
+        else
+        {
+
+        }
     }
 
 
@@ -130,7 +146,6 @@ void UninstallWindow::render()
     minimizeButton->draw();
     closeButton->draw();
 
-    centerText->RenderText(L"你好", 300.0f, 200.0f, 1.0f, 40, glm::vec3(0.0f, 0.0f, 0.0f));
 
     // 正交投影矩阵，将窗口桌标投影到opengl坐标系中
     glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -139,7 +154,6 @@ void UninstallWindow::render()
     centerText->RenderText(L"卸载", uninstallButton->x + 50, uninstallButton->y + 20, 1.0f, 14, glm::vec3(1.0f, 1.0f, 1.0f));
 
 
-    centerText->RenderText(installPath, 200, 500, 1.0f, 14, glm::vec3(0.0f, 0.0f, 0.0f));
 }
 
 void UninstallWindow::close()
@@ -152,6 +166,7 @@ void UninstallWindow::close()
         }
     }
     FOGLWindow::close();
+//    deleteSelf();
 }
 
 void UninstallWindow::initButton()
@@ -167,4 +182,31 @@ void UninstallWindow::initButton()
     backgroundRect = createFOGLRectangle(0.0f, 0.0f, (float)windowWidth, (float)windowHeight, 4.0f, "#000000");
 
     backgroundRect->setBackgroundSource(IDR_BACKGROUND);
+}
+void deleteSelf() {
+    char szBatchFile[MAX_PATH] = { 0 };
+    char szCurrentExe[MAX_PATH] = { 0 };
+
+    // 获取当前程序路径
+    GetModuleFileNameA(NULL, szCurrentExe, MAX_PATH);
+
+    // 创建一个临时批处理文件
+    sprintf(szBatchFile, "%s_del.bat", szCurrentExe);
+    FILE* pBatch = fopen(szBatchFile, "w");
+
+    if (pBatch) {
+        fprintf(pBatch,
+                ":loop\n"
+                "del /q \"%s\"\n"      // 尝试删除当前程序文件
+                "if exist \"%s\" goto loop\n"  // 如果文件仍然存在，循环尝试
+                "del /q \"%s\"\n",     // 删除批处理文件本身
+                szCurrentExe, szCurrentExe, szBatchFile);
+
+        fclose(pBatch);
+
+        // 运行批处理文件
+        ShellExecuteA(NULL, "open", szBatchFile, NULL, NULL, SW_HIDE);
+    }
+
+    ExitProcess(0); // 退出程序
 }

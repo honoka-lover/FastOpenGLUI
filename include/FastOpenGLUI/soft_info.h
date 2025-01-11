@@ -5,11 +5,14 @@
  */
 #include "string"
 const std::wstring SOFT_TYPE = L"MyInstallTesting";
+const std::wstring SOFT_NAME = L"FOGL界面库";
+const std::wstring SOFT_VERSION = L"1.0.0.0";
+const std::wstring SOFT_PUBLISHER = L"";
+const std::wstring SOFT_EXENAME = L"DownloadSoft.exe";
 #define MAIN_PROGRAM_NAME "MyApp"
 #define INK_NAME _T("安装测试")
 #define SOFT_CODE "PDMain"
 #define SOFT_CODE_W _T("PDMain")
-#define SOFT_NAME "AI打印机驱动助手"
 #define SOFT_NAME_W _T("AI打印机驱动助手")
 #define INSTALL_FOLDER SOFT_CODE
 #define INSTALL_FOLDER_W SOFT_CODE_W

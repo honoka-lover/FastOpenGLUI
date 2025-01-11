@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(FastOpenGLUI)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories(
@@ -49,6 +49,8 @@ endif()
 target_link_libraries(FOGLLib PRIVATE
         opengl32
         Shlwapi
+        Shell32
+        psapi
         ${CMAKE_SOURCE_DIR}/lib/bz2.lib
         ${CMAKE_SOURCE_DIR}/lib/lzma.lib
         ${CMAKE_SOURCE_DIR}/lib/lz4.lib
@@ -58,13 +60,8 @@ target_link_libraries(FOGLLib PRIVATE
         ${LIBS}
 )
 
-
-if(MSCV)
-    #提权
-    #    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MANIFESTUAC:\"level='requireAdministrator' uiAccess='false'\"")
-    set_property(TARGET InstallProject PROPERTY
-            MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif ()
+set_property(TARGET FOGLLib PROPERTY
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 
 add_subdirectory(src/InstallWindow)
 add_subdirectory(src/UninstallWindow)
