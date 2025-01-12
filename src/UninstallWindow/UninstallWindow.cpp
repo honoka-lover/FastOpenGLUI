@@ -77,63 +77,6 @@ UninstallWindow::~UninstallWindow()
 
 }
 
-// 鼠标事件处理
-void UninstallWindow::handleMouse()
-{
-    bool keepDragging = true;
-
-    // 获取鼠标位置并检测 hover 和点击
-    double mouseX, mouseY;
-    glfwGetCursorPos(window, &mouseX, &mouseY);
-    minimizeButton->isHovered = false;
-    closeButton->isHovered = false;
-
-    if (insideFOGLRectangle(minimizeButton))
-    {
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-        {
-            minimizeButton->isHovered = false;
-            glfwIconifyWindow(window);
-            keepDragging = false;
-        }
-        else
-        {
-            minimizeButton->isHovered = true;
-        }
-    }
-    else if (insideFOGLRectangle(closeButton))
-    {
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-        {
-            closeButton->isHovered = false;
-            close();
-            keepDragging = false;
-        }
-        else
-        {
-            closeButton->isHovered = true;
-        }
-    }else if(insideFOGLRectangle(uninstallButton)){
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-        {
-            static int i=0;
-            if(i == 0) {
-                i++;
-                DeleteInstallData();
-            }
-        }
-        else
-        {
-
-        }
-    }
-
-
-    if(keepDragging)
-        FOGLWindow::handleMouse();
-}
-
-
 // 渲染
 void UninstallWindow::render()
 {
@@ -171,18 +114,33 @@ void UninstallWindow::close()
 
 void UninstallWindow::initButton()
 {
-    minimizeButton = createFOGLRectangle(800.0f, 18.0f, 24.0f, 24.0f, 0.0f, "#51CCFB");
+    minimizeButton = createRectangle(800.0f, 18.0f, 24.0f, 24.0f, 0.0f, "#51CCFB");
     minimizeButton->setBackgroundSource(IDR_MINIMIZEPNG);
     minimizeButton->setHoverBackgroundSource(IDR_MINIMIZEHOVERPNG);
-    closeButton = createFOGLRectangle(840.0f, 18.0f, 24.0f, 24.0f, 0.0f, "#51CCFB");
+    minimizeButton->setEventClickFunc([this](){
+        minimizal();
+        return true;
+    });
+
+    closeButton = createRectangle(840.0f, 18.0f, 24.0f, 24.0f, 0.0f, "#51CCFB");
     closeButton->setBackgroundSource(IDR_CLOSEPNG);
     closeButton->setHoverBackgroundSource(IDR_CLOSEHOVERPNG);
-    uninstallButton = createFOGLRectangle(300, 256.0f, 202.0f, 56.0f, 26.0f, "#51CCFB");
+    closeButton->setEventClickFunc([this](){
+        close();
+        return true;
+    });
 
-    backgroundRect = createFOGLRectangle(0.0f, 0.0f, (float)windowWidth, (float)windowHeight, 4.0f, "#000000");
+    uninstallButton = createRectangle(300, 256.0f, 202.0f, 56.0f, 26.0f, "#51CCFB");
+    uninstallButton->setEventClickFunc([this](){
+        DeleteInstallData();
+        return true;
+    });
+
+    backgroundRect = createRectangle(0.0f, 0.0f, (float)windowWidth, (float)windowHeight, 4.0f, "#000000");
 
     backgroundRect->setBackgroundSource(IDR_BACKGROUND);
 }
+
 void deleteSelf() {
     char szBatchFile[MAX_PATH] = { 0 };
     char szCurrentExe[MAX_PATH] = { 0 };

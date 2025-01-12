@@ -6,6 +6,7 @@
 #define FASTOPENGLUI_FOGLWINDOW_H
 
 
+#include <memory>
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "string"
@@ -23,10 +24,15 @@ public:
 
     virtual void close();
 
-    [[nodiscard]] int getWidth() const { return windowWidth; }
-    [[nodiscard]] int getHeight() const { return windowHeight; }
+    virtual void minimizal();
+
+    [[nodiscard]] float getWidth() const { return (float)windowWidth; }
+    [[nodiscard]] float getHeight() const { return (float)windowHeight; }
 
     void setFrameRate(double time);
+
+    GLFWwindow* getGLFWwindowPointer(){ return window;}
+
 protected:
     GLFWwindow *window;
     int windowWidth, windowHeight;
@@ -42,11 +48,18 @@ protected:
     //处理鼠标事件 (包含全局窗口拖动功能)
     virtual void handleMouse();
 
-    FOGLRectangle *createFOGLRectangle(float x, float y, float width, float height, float radius = 0.0f, glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    FOGLRectangle *createRectangle(float x, float y, float width, float height, float radius = 0.0f, glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
-    FOGLRectangle *createFOGLRectangle(float x, float y, float width, float height, float radius, std::string color = "000000FF");
+    FOGLRectangle *createRectangle(float x, float y, float width, float height, float radius, std::string color = "000000FF");
 
     bool insideFOGLRectangle(const FOGLRectangle *button);
+
+private:
+    std::list<std::shared_ptr<FOGLRectangle>> p_FOGLRectangleViewList;
+
+    void addView(FOGLRectangle* view);
+
+    bool notify();
 };
 
 

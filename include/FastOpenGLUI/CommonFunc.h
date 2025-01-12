@@ -35,4 +35,13 @@ void loadTextureFromResource(int resourceID, GLuint &textureID);
 
 // UTF-8 转 GB2312
 std::string UTF8ToGB2312(const std::string& utf8Str);
+
+// 遍历删除文件和目录，无法删除的跳过
+void SafeRemoveAll(const fs::path& dirPath);
+
+// 删除快捷方式文件
+bool DeleteShortcut(const std::wstring& shortcutPath);
+
+// 根据进程名和路径查找并终止进程
+bool KillProcessByPath(const std::string& exePath);
 #endif //FASTOPENGLUI_COMMONFUNC_H

@@ -30,8 +30,7 @@ private:
 
     fs::path installPath;
 
-    void render();
-    void handleMouse();
+    void render() override;
 
     void initButton();
 };

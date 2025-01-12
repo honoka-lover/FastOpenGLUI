@@ -3,8 +3,7 @@
 #include <shlobj.h>
 #include "CommonFunc.h"
 #include <shlwapi.h>
-#include <TlHelp32.h>
-#include "psapi.h"
+
 bool ReadFromRegistry(HKEY hKeyRoot, const std::wstring &subKey, const std::wstring &valueName, std::wstring &data)
 {
     HKEY hKey;
@@ -227,48 +226,6 @@ void WriteInstallData(const std::filesystem::path installPath){
 
 }
 
-// 根据进程名和路径查找并终止进程
-bool KillProcessByPath(const std::string& exePath) {
-    bool isKilled = false;
-
-    // 创建快照
-    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    if (hSnapshot == INVALID_HANDLE_VALUE) {
-        std::cerr << "Failed to create process snapshot!" << std::endl;
-        return false;
-    }
-
-    PROCESSENTRY32 pe32;
-    pe32.dwSize = sizeof(PROCESSENTRY32);
-
-    // 遍历进程快照
-    if (Process32First(hSnapshot, &pe32)) {
-        do {
-            // 获取进程句柄
-            HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_TERMINATE, FALSE, pe32.th32ProcessID);
-            if (hProcess) {
-                char processPath[MAX_PATH];
-                if (GetModuleFileNameExA(hProcess, NULL, processPath, MAX_PATH)) {
-                    // 检查路径是否匹配
-                    if (_stricmp(processPath, exePath.c_str()) == 0) {
-                        // 终止进程
-                        if (TerminateProcess(hProcess, 0)) {
-                            std::cout << "Terminated process: " << processPath << std::endl;
-                            isKilled = true;
-                        } else {
-                            std::cerr << "Failed to terminate process: " << processPath << std::endl;
-                        }
-                    }
-                }
-                CloseHandle(hProcess);
-            }
-        } while (Process32Next(hSnapshot, &pe32));
-    }
-
-    CloseHandle(hSnapshot);
-    return isKilled;
-}
-
 // 去除字符串末尾的 "\uninstall.exe"
 std::wstring RemoveUninstallSuffix(const std::wstring& input) {
     const std::wstring suffix = L"\\uninstall.exe";
@@ -277,47 +234,6 @@ std::wstring RemoveUninstallSuffix(const std::wstring& input) {
         return input.substr(0, pos); // 去掉后缀
     }
     return input; // 如果后缀不存在，则返回原字符串
-}
-
-// 删除快捷方式文件
-bool DeleteShortcut(const std::wstring& shortcutPath) {
-    if (DeleteFileW(shortcutPath.c_str())) {
-        std::wcout << "Deleted shortcut: " << shortcutPath << std::endl;
-        return true;
-    } else {
-        std::wcerr << "Failed to delete shortcut: " << shortcutPath << " Error: " << GetLastError() << std::endl;
-        return false;
-    }
-}
-
-// 遍历删除文件和目录，无法删除的跳过
-void SafeRemoveAll(const fs::path& dirPath) {
-    for (const auto& entry : fs::directory_iterator(dirPath)) {
-        std::error_code ec; // 用于捕获删除时的错误
-
-        if (fs::is_directory(entry)) {
-            // 递归删除子目录
-            SafeRemoveAll(entry.path());
-            fs::remove(entry.path(), ec);
-        } else {
-            // 删除文件
-            fs::remove(entry, ec);
-        }
-
-        if (ec) {
-            // 如果发生错误，输出错误信息并跳过
-            std::cerr << "Failed to delete: " << entry.path()
-                      << ". Error: " << ec.message() << std::endl;
-        }
-    }
-
-    // 最后删除自身目录
-    std::error_code ec;
-    fs::remove(dirPath, ec);
-    if (ec) {
-        std::cerr << "Failed to delete directory: " << dirPath
-                  << ". Error: " << ec.message() << std::endl;
-    }
 }
 
 void DeleteInstallData(){

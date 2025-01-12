@@ -40,6 +40,8 @@ FOGLWindow::FOGLWindow(int width, int height, const std::string &title):
 }
 
 FOGLWindow::~FOGLWindow(){
+    p_FOGLRectangleViewList.clear();
+
     glfwDestroyWindow(window);
     glfwTerminate();
 }
@@ -91,6 +93,9 @@ void FOGLWindow::handleMouse() {
     double mouseX, mouseY;
     glfwGetCursorPos(window, &mouseX, &mouseY);
 
+    if(notify())
+        return;
+
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
     {
         if (!isDragging)
@@ -134,11 +139,39 @@ bool FOGLWindow::insideFOGLRectangle(const FOGLRectangle *button)
 }
 
 FOGLRectangle *
-FOGLWindow::createFOGLRectangle(float x, float y, float width, float height, float radius, glm::vec4 color){
-    return new FOGLRectangle(x, y, width, height, radius, color, windowWidth, windowHeight);
+FOGLWindow::createRectangle(float x, float y, float width, float height, float radius, glm::vec4 color){
+    auto *view = FOGLRectangle::createFOGLRectangle(x, y, width, height, radius, color, this);
+    addView(view);
+    return view;
 }
 
 FOGLRectangle *
-FOGLWindow::createFOGLRectangle(float x, float y, float width, float height, float radius, std::string color) {
-    return new FOGLRectangle(x, y, width, height, radius, colorStringToVec4(color), windowWidth, windowHeight);
+FOGLWindow::createRectangle(float x, float y, float width, float height, float radius, std::string color) {
+    auto *view =  FOGLRectangle::createFOGLRectangle(x, y, width, height, radius, colorStringToVec4(color), this);
+    addView(view);
+    return view;
+}
+
+void FOGLWindow::addView(FOGLRectangle *view) {
+    std::shared_ptr<FOGLRectangle> temp(view);
+    auto iter = find(p_FOGLRectangleViewList.begin(), p_FOGLRectangleViewList.end(), temp);
+    if (iter == p_FOGLRectangleViewList.end()) {
+        p_FOGLRectangleViewList.push_front(temp);
+    } else {
+        std::cout << "View already exists" << std::endl;
+    }
+}
+
+bool FOGLWindow::notify() {
+    auto iter = p_FOGLRectangleViewList.begin();
+    for(; iter != p_FOGLRectangleViewList.end(); iter++)
+    {
+        if((*iter).get()->processMouseEvent())
+            return true;
+    }
+    return false;
+}
+
+void FOGLWindow::minimizal() {
+    glfwIconifyWindow(window);
 }

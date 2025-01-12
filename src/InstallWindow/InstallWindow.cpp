@@ -75,83 +75,6 @@ InstallWindow::~InstallWindow()
 
 }
 
-// 鼠标事件处理
-void InstallWindow::handleMouse()
-{
-    bool keepDragging = true;
-
-    // 获取鼠标位置并检测 hover 和点击
-    double mouseX, mouseY;
-    glfwGetCursorPos(window, &mouseX, &mouseY);
-    minimizeButton->isHovered = false;
-    closeButton->isHovered = false;
-
-    if (insideFOGLRectangle(minimizeButton))
-    {
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-        {
-            minimizeButton->isHovered = false;
-            glfwIconifyWindow(window);
-            keepDragging = false;
-        }
-        else
-        {
-            minimizeButton->isHovered = true;
-        }
-    }
-    else if (insideFOGLRectangle(closeButton))
-    {
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-        {
-            closeButton->isHovered = false;
-            close();
-            keepDragging = false;
-        }
-        else
-        {
-            closeButton->isHovered = true;
-        }
-    }
-    else if (insideFOGLRectangle(folderButton))
-    {
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-        {
-            if (fs::exists(installPath))
-            {
-                auto result = selectFolderUsingIFileDialog(installPath);
-                if (!result.empty())
-                    installPath = result / SOFT_TYPE;
-            }
-            else
-            {
-                auto result = selectFolderUsingIFileDialog(L"C:\\Program Files");
-                if (!result.empty())
-                    installPath = result / SOFT_TYPE;
-            }
-            std::cout << installPath.string() << std::endl;
-            keepDragging = false;
-        }
-        else
-        {
-        }
-    }
-    else if (insideFOGLRectangle(installButton))
-    {
-        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-        {
-            if (!isThreadRunning)
-                extractRes(installPath);
-            keepDragging = false;
-        }
-        else
-        {
-        }
-    }
-
-    if(keepDragging)
-        FOGLWindow::handleMouse();
-}
-
 
 // 渲染
 void InstallWindow::render()
@@ -213,19 +136,53 @@ void InstallWindow::close()
 
 void InstallWindow::initButton()
 {
-    minimizeButton = createFOGLRectangle(800.0f, 18.0f, 24.0f, 24.0f, 0.0f, "#51CCFB");
+    minimizeButton = createRectangle(800.0f, 18.0f, 24.0f, 24.0f, 0.0f, "#51CCFB");
     minimizeButton->setBackgroundSource(IDR_MINIMIZEPNG);
     minimizeButton->setHoverBackgroundSource(IDR_MINIMIZEHOVERPNG);
-    closeButton = createFOGLRectangle(840.0f, 18.0f, 24.0f, 24.0f, 0.0f, "#51CCFB");
+
+    minimizeButton->setEventClickFunc([this](){
+        minimizal();
+        return true;
+    });
+
+    closeButton = createRectangle(840.0f, 18.0f, 24.0f, 24.0f, 0.0f, "#51CCFB");
     closeButton->setBackgroundSource(IDR_CLOSEPNG);
     closeButton->setHoverBackgroundSource(IDR_CLOSEHOVERPNG);
-    installButton = createFOGLRectangle(300, 256.0f, 202.0f, 56.0f, 26.0f, "#51CCFB");
 
-    folderButton = createFOGLRectangle(528, 320, 98, 40, 4, glm::vec4(0x56 / 255.0f, 0x57 / 255.0f, 0x5B / 255.0f, 0.9f));
+    closeButton->setEventClickFunc([this](){
+        close();
+        return true;
+    });
 
-    installBack = createFOGLRectangle(200, 500, 400, 200, 4, "#ffffff");
+    installButton = createRectangle(300, 256.0f, 202.0f, 56.0f, 26.0f, "#51CCFB");
 
-    backgroundRect = createFOGLRectangle(0.0f, 0.0f, (float)windowWidth, (float)windowHeight, 4.0f, "#000000");
+    installButton->setEventClickFunc([this](){
+        if (!isThreadRunning)
+            extractRes(installPath);
+        return true;
+    });
+
+    folderButton = createRectangle(528, 320, 98, 40, 4, glm::vec4(0x56 / 255.0f, 0x57 / 255.0f, 0x5B / 255.0f, 0.9f));
+    folderButton->setEventClickFunc([this](){
+        if (fs::exists(installPath))
+        {
+            auto result = selectFolderUsingIFileDialog(installPath);
+            if (!result.empty())
+                installPath = result / SOFT_TYPE;
+        }
+        else
+        {
+            auto result = selectFolderUsingIFileDialog(L"C:\\Program Files");
+            if (!result.empty())
+                installPath = result / SOFT_TYPE;
+        }
+        std::cout << installPath.string() << std::endl;
+        return true;
+    });
+
+    installBack = createRectangle(200, 500, 400, 200, 4, "#ffffff");
+
+    backgroundRect = createRectangle(0.0f, 0.0f, (float)windowWidth, (float)windowHeight, 4.0f, "#000000");
 
     backgroundRect->setBackgroundSource(IDR_BACKGROUND);
 }

@@ -1,7 +1,7 @@
 ﻿#include "glad/glad.h"
 #include "FOGLRectangle.h"
 #include <stb_image.h>
-
+#include "FOGLWindow.h"
 // 顶点着色器源码
 static const char *vertexShaderSource = R"(
 #version 330 core
@@ -89,9 +89,21 @@ void main() {
 )";
 
 
-FOGLRectangle::FOGLRectangle(float x, float y, float width, float height, float radius, glm::vec4 color, float parentWidth,float parentHeight)
-    : x(x), y(y), width(width), height(height), radius(radius), color(color), windowHeight(parentHeight), windowWidth(parentWidth)
+FOGLRectangle::FOGLRectangle(float x, float y, float width, float height, float radius, glm::vec4 color, FOGLWindow*window)
+    : x(x)
+    , y(y)
+    , width(width)
+    , height(height)
+    , radius(radius)
+    , color(color)
+    , mainWindow(window)
 {
+    if(window){
+        windowWidth = float(window->getWidth());
+        windowHeight = float(window->getHeight());
+    }else{
+        throw std::invalid_argument("parentWindow* can not be null");
+    }
 
     // 编译着色器
     this->shader.Compile(vertexShaderSource, fragmentShaderSource);
@@ -144,28 +156,36 @@ FOGLRectangle::FOGLRectangle(float x, float y, float width, float height, float 
 
 void FOGLRectangle::draw(const glm::mat4 &projection)
 {
-    glEnable(GL_BLEND);
-    // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    if(visibleFlag){
+        glEnable(GL_BLEND);
+        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    // activate corresponding render state
-    shader.Use();
+        // activate corresponding render state
+        shader.Use();
 
-    // 设置 uniform
-    shader.SetVector2f("screenSize", windowWidth, windowHeight);
-    shader.SetMatrix4("projection", projection);
-    shader.SetVector2f("resolution", width, height);
-    shader.SetVector4f("buttonColor", color);
-    shader.SetFloat("radius", radius);
-    shader.SetVector2f("pos", x, y);
+        // 设置 uniform
+        shader.SetVector2f("screenSize", windowWidth, windowHeight);
+        shader.SetMatrix4("projection", projection);
+        shader.SetVector2f("resolution", width, height);
+        shader.SetVector4f("buttonColor", color);
+        shader.SetFloat("radius", radius);
+        shader.SetVector2f("pos", x, y);
 
-    if(useTexture)
-        glBindTexture(GL_TEXTURE_2D, isHovered ? hoverTexture : normalTexture);
+        if(useTexture){
+            if(useHoverFlag){
+                glBindTexture(GL_TEXTURE_2D, isHovered ? hoverTexture : normalTexture);
+            }else{
+                glBindTexture(GL_TEXTURE_2D,normalTexture);
+            }
+        }
 
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glBindVertexArray(0);
+
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray(0);
+    }
 }
 
 void FOGLRectangle::setColor(const glm::vec4 &color) {
@@ -191,6 +211,44 @@ void FOGLRectangle::setHoverBackgroundSource(int id) {
     if(useTexture == false)
         throw std::runtime_error("缺失背景图");
     loadTextureFromResource(id,hoverTexture);
+    useHoverFlag = true;
+}
+
+void FOGLRectangle::setVisible(bool show) {
+    visibleFlag = show;
+}
+
+FOGLRectangle *
+FOGLRectangle::createFOGLRectangle(float x, float y, float width, float height, float radius, glm::vec4 color,FOGLWindow *window) {
+
+    return new FOGLRectangle(x,y,width,height,radius,color, window);
+}
+
+bool FOGLRectangle::processMouseEvent() {
+    // 获取鼠标位置并检测 hover 和点击
+    double mouseX, mouseY;
+    glfwGetCursorPos(mainWindow->getGLFWwindowPointer(), &mouseX, &mouseY);
+    isHovered = false;
+
+    if(!visibleFlag)
+        return false;
+
+
+    if (glfwGetMouseButton(mainWindow->getGLFWwindowPointer(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS
+    && insideFOGLRectangle(mainWindow->getGLFWwindowPointer())) {
+        if (!clickFlag) {
+            clickFlag = true;
+            if (static_cast<bool>(clickEvent) && clickEvent())
+                return true;
+        }
+    }else if(insideFOGLRectangle(mainWindow->getGLFWwindowPointer())){
+        isHovered = true;
+        clickFlag = false;
+    }else if(glfwGetMouseButton(mainWindow->getGLFWwindowPointer(), GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS ){
+        clickFlag = false;
+    }
+
+    return false;
 }
 
 //void FOGLRectangle::move(float x, float y) {
