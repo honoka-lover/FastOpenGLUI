@@ -1,10 +1,9 @@
 ﻿#ifndef GLFW_ROUND_BUTTON_H
 #define GLFW_ROUND_BUTTON_H
 
-#include <utility>
-
-#include "GLFW/glfw3.h"
 #include "shader.h"
+#include <utility>
+#include "GLFW/glfw3.h"
 #include "CommonFunc.h"
 
 class FOGLWindow;
@@ -14,6 +13,7 @@ public:
     // 禁止拷贝构造和赋值
     FOGLRectangle(const FOGLRectangle&) = delete;
     FOGLRectangle& operator=(const FOGLRectangle&) = delete;
+    FOGLRectangle() = delete;
 
     // 提供一个静态方法，通过 new 创建对象
     static FOGLRectangle* createFOGLRectangle(float x, float y, float width, float height, float radius, glm::vec4 color,FOGLWindow* window);
@@ -22,27 +22,34 @@ public:
     
     Shader shader;
     // 绘制圆角矩形按钮
-    void draw(const glm::mat4 &projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
+    virtual void draw(const glm::mat4 &projection);
 
-    void setColor(const glm::vec4 &color);
+    virtual void draw();
 
-    void setBackgroundSource(int id);
+    virtual void setColor(const glm::vec4 &color);
 
-    void setHoverBackgroundSource(int id);
+    virtual void setBackgroundSource(int id);
+
+    virtual void setHoverBackgroundSource(int id);
 
     float x, y, width, height, radius, windowWidth, windowHeight;
 //    void move(float x,float y);
     bool isHovered = false;
 
-    void setVisible(bool show);
+    virtual void setVisible(bool show);
 
     //是否要阻止事件传递
-    bool processMouseEvent();
+    virtual bool processMouseEvent();
 
-    void setEventClickFunc(std::function<bool()> &&event){
+    virtual void setEventClickFunc(std::function<bool()> &&event){
         clickEvent = std::move(event);
     }
-private:
+
+    virtual void move(float x,float y);
+
+    virtual void resize(float newWidth, float newHeight);
+
+protected:
     FOGLWindow *mainWindow = nullptr;
 
     glm::vec4 color{};
@@ -64,7 +71,7 @@ private:
 
     std::function<bool()> clickEvent;
 
-    FOGLRectangle(){}
+
     // 构造函数，设置按钮的初始位置、大小和圆角半径
     FOGLRectangle(float x, float y, float width, float height, float radius, glm::vec4 color,FOGLWindow* window);
 

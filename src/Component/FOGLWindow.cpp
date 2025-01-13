@@ -175,3 +175,17 @@ bool FOGLWindow::notify() {
 void FOGLWindow::minimizal() {
     glfwIconifyWindow(window);
 }
+
+FOGLProgressBar *
+FOGLWindow::createProgressBar(float x, float y, float width, float height, float radius, glm::vec4 color) {
+    auto *view = FOGLProgressBar::createFOGLProgressBar(x, y, width, height, radius, color, this);
+    addView(view);
+    return view;
+}
+
+FOGLProgressBar *
+FOGLWindow::createProgressBar(float x, float y, float width, float height, float radius, std::string color) {
+    auto *view =  FOGLProgressBar::createFOGLProgressBar(x, y, width, height, radius, colorStringToVec4(color), this);
+    addView(view);
+    return view;
+}

@@ -96,7 +96,7 @@ void UninstallWindow::render()
 
     centerText->RenderText(L"卸载", uninstallButton->x + 50, uninstallButton->y + 20, 1.0f, 14, glm::vec3(1.0f, 1.0f, 1.0f));
 
-
+    progressBar->draw();
 }
 
 void UninstallWindow::close()
@@ -119,6 +119,8 @@ void UninstallWindow::initButton()
     minimizeButton->setHoverBackgroundSource(IDR_MINIMIZEHOVERPNG);
     minimizeButton->setEventClickFunc([this](){
         minimizal();
+//            minimizeButton->resize(200,200);
+//        minimizeButton->move(-20,0);
         return true;
     });
 
@@ -139,6 +141,10 @@ void UninstallWindow::initButton()
     backgroundRect = createRectangle(0.0f, 0.0f, (float)windowWidth, (float)windowHeight, 4.0f, "#000000");
 
     backgroundRect->setBackgroundSource(IDR_BACKGROUND);
+
+    progressBar = createProgressBar(20,300,400,20,10,"#ffffff");
+    progressBar->setInnerProgressColor(glm::vec4(1.0f,0.0f,0.0f,1.0f));
+    progressBar->setValue(0.5);
 }
 
 void deleteSelf() {

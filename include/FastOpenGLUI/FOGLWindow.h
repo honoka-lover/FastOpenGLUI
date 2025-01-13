@@ -13,7 +13,7 @@
 #include "iostream"
 #include "thread"
 #include "FOGLRectangle.h"
-
+#include "FOGLProgressBar.h"
 class FOGLWindow{
 public:
     FOGLWindow(int width, int height, const std::string &title = "");
@@ -51,6 +51,10 @@ protected:
     FOGLRectangle *createRectangle(float x, float y, float width, float height, float radius = 0.0f, glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
 
     FOGLRectangle *createRectangle(float x, float y, float width, float height, float radius, std::string color = "000000FF");
+
+    FOGLProgressBar *createProgressBar(float x, float y, float width, float height, float radius = 0.0f, glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f));
+
+    FOGLProgressBar *createProgressBar(float x, float y, float width, float height, float radius, std::string color = "000000FF");
 
     bool insideFOGLRectangle(const FOGLRectangle *button);
 

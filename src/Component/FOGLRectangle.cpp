@@ -151,6 +151,13 @@ FOGLRectangle::FOGLRectangle(float x, float y, float width, float height, float 
 
     shader.SetInteger("useBackTexture",0);
 
+    // 设置 uniform
+    shader.SetVector2f("screenSize", windowWidth, windowHeight);
+    shader.SetVector2f("resolution", width, height);
+    shader.SetVector4f("buttonColor", color);
+    shader.SetFloat("radius", radius);
+    shader.SetVector2f("pos", x, y);
+
     glUseProgram(0);
 }
 
@@ -164,14 +171,8 @@ void FOGLRectangle::draw(const glm::mat4 &projection)
 
         // activate corresponding render state
         shader.Use();
-
-        // 设置 uniform
-        shader.SetVector2f("screenSize", windowWidth, windowHeight);
         shader.SetMatrix4("projection", projection);
-        shader.SetVector2f("resolution", width, height);
-        shader.SetVector4f("buttonColor", color);
-        shader.SetFloat("radius", radius);
-        shader.SetVector2f("pos", x, y);
+
 
         if(useTexture){
             if(useHoverFlag){
@@ -190,6 +191,9 @@ void FOGLRectangle::draw(const glm::mat4 &projection)
 
 void FOGLRectangle::setColor(const glm::vec4 &color) {
     this->color = color;
+    shader.Use();
+    shader.SetVector4f("buttonColor", color);
+
 }
 
 void FOGLRectangle::setBackgroundSource(int id) {
@@ -203,6 +207,8 @@ void FOGLRectangle::setBackgroundSource(int id) {
 FOGLRectangle::~FOGLRectangle() {
     if(useTexture){
         glDeleteTextures(1,&normalTexture);
+        if(hoverTexture)
+            glDeleteTextures(1,&hoverTexture);
     }
 }
 
@@ -251,7 +257,55 @@ bool FOGLRectangle::processMouseEvent() {
     return false;
 }
 
-//void FOGLRectangle::move(float x, float y) {
-//    shader.Use();
-//    shader.SetVector2f("pos",x,y);
-//}
+void FOGLRectangle::move(float x, float y) {
+    shader.Use();
+
+    this->x += x;
+    this->y += y;
+
+    // 更新顶点数据
+    float vertices[] = {
+            this->x, this->y, 0.0f, 0.0f,
+            this->x + width, this->y, 1.0f, 0.0f,
+            this->x, this->y + height, 0.0f, 1.0f,
+            this->x + width, this->y + height, 1.0f, 1.0f
+    };
+
+    // 更新缓冲区数据
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // 更新 shader 的 uniform
+    shader.SetVector2f("pos", this->x, this->y);
+
+    glUseProgram(0);
+}
+
+void FOGLRectangle::resize(float newWidth, float newHeight) {
+    // 更新对象的宽度和高度
+    width = newWidth;
+    height = newHeight;
+
+    // 重新计算顶点数据
+    float vertices[] = {
+            x, y, 0.0f, 0.0f,
+            x + width, y, 1.0f, 0.0f,
+            x, y + height, 0.0f, 1.0f,
+            x + width, y + height, 1.0f, 1.0f
+    };
+
+    // 更新顶点缓冲区数据
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // 更新着色器的 uniform
+    shader.Use();
+    shader.SetVector2f("resolution", width, height);
+    glUseProgram(0);
+}
+
+void FOGLRectangle::draw() {
+    draw(glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
+}

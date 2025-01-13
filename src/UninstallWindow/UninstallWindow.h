@@ -8,7 +8,7 @@
 #include "thread"
 #include "FastOpenGLUI/FOGLWindow.h"
 #include "FastOpenGLUI/CommonFunc.h"
-
+#include "FastOpenGLUI/FOGLProgressBar.h"
 class UninstallWindow:public FOGLWindow
 {
 public:
@@ -21,6 +21,8 @@ private:
 
     FOGLRectangle *minimizeButton, *closeButton;
     FOGLRectangle *uninstallButton, *backgroundRect;
+    FOGLProgressBar *progressBar;
+
 
     std::thread extractionThread;      // 提取线程
     std::atomic<bool> isThreadRunning; // 标记线程是否正在运行
