@@ -10,7 +10,7 @@
 #include "FastOpenGLUI/soft_info.h"
 #include "UninstallResources.h"
 #include "regeditFunction.h"
-#include "shellapi.h"
+
 namespace fs = std::filesystem;
 
 // 顶点着色器源码
@@ -64,6 +64,7 @@ UninstallWindow::UninstallWindow(int width, int height, const std::string &title
     installPath = L"C:\\Program Files\\" + SOFT_TYPE;
 
     initButton();
+
 }
 
 // 析构函数
@@ -89,14 +90,25 @@ void UninstallWindow::render()
     minimizeButton->draw();
     closeButton->draw();
 
+    centerText->RenderText(SOFT_NAME + L"卸载程序", 200.0f, 180.0f, 1.0f, 40, glm::vec3(0.0f, 0.0f, 0.0f));
 
     // 正交投影矩阵，将窗口桌标投影到opengl坐标系中
     glm::mat4 projection = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
     uninstallButton->draw(projection);
-
-    centerText->RenderText(L"卸载", uninstallButton->x + 50, uninstallButton->y + 20, 1.0f, 14, glm::vec3(1.0f, 1.0f, 1.0f));
+    if(uninstallButton->visible())
+        centerText->RenderText(L"立即卸载", uninstallButton->x + 65, uninstallButton->y + 16, 1.0f, 20,glm::vec3(1.0f, 1.0f, 1.0f));
 
     progressBar->draw();
+    if(progressBar->visible()){
+        if(currentValue < 90.0f)
+            currentValue.store(currentValue.load() + 0.1f);
+        progressBar->setValue(currentValue.load()/100);
+        centerText->RenderText(L"卸载中...", uninstallButton->x + 65, uninstallButton->y + 140, 1.0f, 18, glm::vec3(0.0f, 0.0f, 0.0f));
+    }
+
+    welComeButton->draw();
+    if(welComeButton->visible())
+        centerText->RenderText(L"卸载完成", uninstallButton->x + 65, uninstallButton->y + 16, 1.0f, 20,glm::vec3(1.0f, 1.0f, 1.0f));
 }
 
 void UninstallWindow::close()
@@ -129,12 +141,21 @@ void UninstallWindow::initButton()
     closeButton->setHoverBackgroundSource(IDR_CLOSEHOVERPNG);
     closeButton->setEventClickFunc([this](){
         close();
+        if(welComeButton->visible())
+            deleteSelf();
         return true;
     });
 
-    uninstallButton = createRectangle(300, 256.0f, 202.0f, 56.0f, 26.0f, "#51CCFB");
+    uninstallButton = createRectangle(320, 280.0f, 240.0f, 80.0f, 40.0f, "#51CCFB");
     uninstallButton->setEventClickFunc([this](){
+        uninstallButton->setVisible(false);
+        progressBar->setVisible(true);
         DeleteInstallData();
+
+        consoleProgress.start(4000,[this](){
+            welComeButton->setVisible(true);
+            progressBar->setVisible(false);
+        });
         return true;
     });
 
@@ -142,35 +163,20 @@ void UninstallWindow::initButton()
 
     backgroundRect->setBackgroundSource(IDR_BACKGROUND);
 
-    progressBar = createProgressBar(20,300,400,20,10,"#ffffff");
-    progressBar->setInnerProgressColor(glm::vec4(1.0f,0.0f,0.0f,1.0f));
-    progressBar->setValue(0.5);
-}
+    welComeButton = createRectangle(320, 280.0f, 240.0f, 80.0f, 40.0f, "#51CCFB");
 
-void deleteSelf() {
-    char szBatchFile[MAX_PATH] = { 0 };
-    char szCurrentExe[MAX_PATH] = { 0 };
+    welComeButton->setEventClickFunc([this](){
+        close();
+        deleteSelf();
+        return true;
+    });
+    welComeButton->setVisible(false);
 
-    // 获取当前程序路径
-    GetModuleFileNameA(NULL, szCurrentExe, MAX_PATH);
+    backgroundRect = createRectangle(0.0f, 0.0f, (float)windowWidth, (float)windowHeight, 4.0f, "#000000");
 
-    // 创建一个临时批处理文件
-    sprintf(szBatchFile, "%s_del.bat", szCurrentExe);
-    FILE* pBatch = fopen(szBatchFile, "w");
+    backgroundRect->setBackgroundSource(IDR_BACKGROUND);
 
-    if (pBatch) {
-        fprintf(pBatch,
-                ":loop\n"
-                "del /q \"%s\"\n"      // 尝试删除当前程序文件
-                "if exist \"%s\" goto loop\n"  // 如果文件仍然存在，循环尝试
-                "del /q \"%s\"\n",     // 删除批处理文件本身
-                szCurrentExe, szCurrentExe, szBatchFile);
-
-        fclose(pBatch);
-
-        // 运行批处理文件
-        ShellExecuteA(NULL, "open", szBatchFile, NULL, NULL, SW_HIDE);
-    }
-
-    ExitProcess(0); // 退出程序
+    progressBar = createProgressBar(100,480,700,16,8,"#ffffff");
+    progressBar->setInnerProgressColor("#51CCFB");
+    progressBar->setVisible(false);
 }

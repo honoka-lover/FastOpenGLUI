@@ -14,7 +14,7 @@
 #include <ShlObj_core.h>
 #include <TlHelp32.h>
 #include <psapi.h>
-
+#include "shellapi.h"
 // 确保目标目录存在
 bool EnsureDirectoryExists(const fs::path& directoryPath) {
     try {
@@ -461,4 +461,42 @@ bool KillProcessByPath(const std::string& exePath) {
 
     CloseHandle(hSnapshot);
     return isKilled;
+}
+
+void LaunchExe(const std::filesystem::path& targetProgramPath) {
+    // 启动目标程序
+    std::string path = "\""+targetProgramPath.string()+"\"";
+    int ret = std::system(path.c_str());
+    if (ret != 0) {
+        std::cerr << "Failed to launch program." << std::endl;
+    }
+}
+
+
+void deleteSelf() {
+    char szBatchFile[MAX_PATH] = { 0 };
+    char szCurrentExe[MAX_PATH] = { 0 };
+
+    // 获取当前程序路径
+    GetModuleFileNameA(NULL, szCurrentExe, MAX_PATH);
+
+    // 创建一个临时批处理文件
+    sprintf(szBatchFile, "%s_del.bat", szCurrentExe);
+    FILE* pBatch = fopen(szBatchFile, "w");
+
+    if (pBatch) {
+        fprintf(pBatch,
+                ":loop\n"
+                "del /q \"%s\"\n"      // 尝试删除当前程序文件
+                "if exist \"%s\" goto loop\n"  // 如果文件仍然存在，循环尝试
+                "del /q \"%s\"\n",     // 删除批处理文件本身
+                szCurrentExe, szCurrentExe, szBatchFile);
+
+        fclose(pBatch);
+
+        // 运行批处理文件
+        ShellExecuteA(NULL, "open", szBatchFile, NULL, NULL, SW_HIDE);
+    }
+
+    ExitProcess(0); // 退出程序
 }

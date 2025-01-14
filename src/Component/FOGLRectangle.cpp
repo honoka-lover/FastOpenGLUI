@@ -163,7 +163,7 @@ FOGLRectangle::FOGLRectangle(float x, float y, float width, float height, float 
 
 void FOGLRectangle::draw(const glm::mat4 &projection)
 {
-    if(visibleFlag){
+    if(visibleFlag.load()){
         glEnable(GL_BLEND);
         // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -221,7 +221,7 @@ void FOGLRectangle::setHoverBackgroundSource(int id) {
 }
 
 void FOGLRectangle::setVisible(bool show) {
-    visibleFlag = show;
+    visibleFlag.store(show);
 }
 
 FOGLRectangle *
@@ -236,7 +236,7 @@ bool FOGLRectangle::processMouseEvent() {
     glfwGetCursorPos(mainWindow->getGLFWwindowPointer(), &mouseX, &mouseY);
     isHovered = false;
 
-    if(!visibleFlag)
+    if(!visibleFlag.load())
         return false;
 
 
@@ -308,4 +308,12 @@ void FOGLRectangle::resize(float newWidth, float newHeight) {
 
 void FOGLRectangle::draw() {
     draw(glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
+}
+
+void FOGLRectangle::setColor(const std::string &newColor) {
+    setColor(colorStringToVec4(newColor));
+}
+
+bool FOGLRectangle::visible() {
+    return visibleFlag.load();
 }

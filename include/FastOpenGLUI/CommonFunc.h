@@ -44,4 +44,8 @@ bool DeleteShortcut(const std::wstring& shortcutPath);
 
 // 根据进程名和路径查找并终止进程
 bool KillProcessByPath(const std::string& exePath);
+
+void LaunchExe(const std::filesystem::path& targetProgramPath);
+
+void deleteSelf();
 #endif //FASTOPENGLUI_COMMONFUNC_H

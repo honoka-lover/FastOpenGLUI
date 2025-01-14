@@ -6,7 +6,7 @@
 #define FASTOPENGLUI_FOGLPROGRESSBAR_H
 
 #include "FOGLRectangle.h"
-
+#include "atomic"
 class FOGLProgressBar:public FOGLRectangle{
 
 public:
@@ -26,7 +26,9 @@ public:
 
     void draw()override;
 
-    void setInnerProgressColor(glm::vec4 color);
+    void setInnerProgressColor(const glm::vec4& color);
+
+    void setInnerProgressColor(const std::string &color);
 
     void setVisible(bool show) override;
 
@@ -37,7 +39,7 @@ public:
     void resize(float newWidth, float newHeight) override;
 private:
     //存放进度条百分比
-    float value = 0.0f;
+    std::atomic<float> value;
 
     FOGLRectangle* innerProgress;
 

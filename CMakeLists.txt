@@ -25,6 +25,7 @@ add_library(FOGLLib STATIC
         ${CMAKE_SOURCE_DIR}/src/Component/CommonFunc.cpp
         ${CMAKE_SOURCE_DIR}/src/Component/FOGLWindow.cpp
         ${CMAKE_SOURCE_DIR}/src/Component/FOGLProgressBar.cpp
+        ${CMAKE_SOURCE_DIR}/src/Component/Timer.cpp
 )
 
 target_include_directories(FOGLLib PRIVATE

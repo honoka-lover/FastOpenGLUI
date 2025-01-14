@@ -7,6 +7,7 @@
 FOGLProgressBar::FOGLProgressBar(float x, float y, float width, float height, float radius, glm::vec4 color,FOGLWindow *window): FOGLRectangle(x,y,width,height,radius,color,window)
 {
     innerProgress = createFOGLRectangle(x,y,width,height,radius,color,window);
+    setValue(0.0f);
 }
 
 FOGLProgressBar::~FOGLProgressBar() {
@@ -24,7 +25,7 @@ void FOGLProgressBar::move(float x, float y) {
 }
 
 void FOGLProgressBar::resize(float newWidth, float newHeight) {
-    innerProgress->resize(newWidth*value,newHeight);
+    innerProgress->resize(newWidth*value.load(),newHeight);
     FOGLRectangle::resize(newWidth, newHeight);
 }
 
@@ -36,8 +37,8 @@ FOGLProgressBar::createFOGLProgressBar(float x, float y, float width, float heig
 void FOGLProgressBar::setValue(float v) {
     if(v>1.001f)
         throw std::invalid_argument("FOGLProgressBar: Value must be less than 1");
-    value = v;
-    innerProgress->resize(width*value,height);
+    value.store(v);
+    innerProgress->resize(width*value.load(),height);
 }
 
 void FOGLProgressBar::setVisible(bool show) {
@@ -45,10 +46,14 @@ void FOGLProgressBar::setVisible(bool show) {
     FOGLRectangle::setVisible(show);
 }
 
-void FOGLProgressBar::setInnerProgressColor(glm::vec4 color) {
+void FOGLProgressBar::setInnerProgressColor(const glm::vec4 &color) {
     innerProgress->setColor(color);
 }
 
 void FOGLProgressBar::draw() {
     draw(glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f));
+}
+
+void FOGLProgressBar::setInnerProgressColor(const std::string &color) {
+    innerProgress->setColor(color);
 }

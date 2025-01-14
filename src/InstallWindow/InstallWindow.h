@@ -8,7 +8,7 @@
 #include "thread"
 #include "FOGLWindow.h"
 #include "CommonFunc.h"
-
+#include "FOGLProgressBar.h"
 class InstallWindow:public FOGLWindow
 {
 public:
@@ -25,10 +25,16 @@ private:
     FOGLRectangle *minimizeButton, *closeButton;
     FOGLRectangle *installButton, *folderButton, *installBack, *backgroundRect;
 
+    FOGLRectangle *welComeButton;
+
+    FOGLProgressBar *progressBar;
+
     std::thread extractionThread;      // 提取线程
     std::atomic<bool> isThreadRunning; // 标记线程是否正在运行
 
     fs::path installPath;
+
+    std::atomic<float> currentValue = 0.0f;
 
     void render() override;
 

@@ -28,6 +28,8 @@ public:
 
     virtual void setColor(const glm::vec4 &color);
 
+    virtual void setColor(const std::string &newColor);
+
     virtual void setBackgroundSource(int id);
 
     virtual void setHoverBackgroundSource(int id);
@@ -38,6 +40,7 @@ public:
 
     virtual void setVisible(bool show);
 
+    virtual bool visible();
     //是否要阻止事件传递
     virtual bool processMouseEvent();
 
@@ -62,7 +65,7 @@ protected:
     bool useHoverFlag = false;
 
     //是否显示
-    bool visibleFlag = true;
+    std::atomic<bool> visibleFlag = true;
 
     GLuint normalTexture, hoverTexture;
 

@@ -50,7 +50,7 @@ void FOGLWindow::run() {
     const double targetFPS = m_frameRate;                // 目标帧率
     const double frameDuration = 1.0 / targetFPS; // 每帧持续时间（秒）
 
-    while (!glfwWindowShouldClose(window))
+    while (!glfwWindowShouldClose(window) && window)
     {
         // 记录帧开始时间
         auto frameStart = std::chrono::high_resolution_clock::now();
@@ -79,6 +79,9 @@ void FOGLWindow::run() {
 
 void FOGLWindow::close() {
     glfwSetWindowShouldClose(window, GLFW_TRUE);
+    glfwDestroyWindow(window);
+    window = nullptr;
+    glfwTerminate();
 }
 
 void FOGLWindow::setFrameRate(double time) {
