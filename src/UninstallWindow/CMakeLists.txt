@@ -1,7 +1,7 @@
 project(UninstallProject)
 
 # 主程序
-add_executable(UninstallProject
+add_executable(UninstallProject WIN32
         Uninstall.cpp
         UninstallWindow.cpp
         UninstallWindow.h

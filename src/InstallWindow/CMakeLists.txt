@@ -1,7 +1,7 @@
 project(InstallProject)
 
 # 主程序
-add_executable(InstallProject
+add_executable(InstallProject WIN32
         Install.cpp
         InstallWindow.cpp
         InstallWindow.h

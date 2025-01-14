@@ -463,12 +463,41 @@ bool KillProcessByPath(const std::string& exePath) {
     return isKilled;
 }
 
+//void LaunchExe(const std::filesystem::path& targetProgramPath) {
+//    // 启动目标程序
+//    std::string path = "\""+targetProgramPath.string()+"\"";
+//    int ret = std::system(path.c_str());
+//    if (ret != 0) {
+//        std::cerr << "Failed to launch program." << std::endl;
+//    }
+//}
 void LaunchExe(const std::filesystem::path& targetProgramPath) {
-    // 启动目标程序
-    std::string path = "\""+targetProgramPath.string()+"\"";
-    int ret = std::system(path.c_str());
-    if (ret != 0) {
-        std::cerr << "Failed to launch program." << std::endl;
+    STARTUPINFOA si = { sizeof(STARTUPINFOA) };
+    PROCESS_INFORMATION pi = { 0 };
+
+    // 设置不显示控制台窗口
+    si.dwFlags = STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_HIDE;
+
+    std::string path = "\"" + targetProgramPath.string() + "\"";
+    if (CreateProcessA(
+            nullptr,                        // 应用程序名称
+            path.data(),                    // 命令行参数
+            nullptr,                        // 进程安全属性
+            nullptr,                        // 线程安全属性
+            FALSE,                          // 是否继承句柄
+            CREATE_NO_WINDOW,               // 创建时不显示窗口
+            nullptr,                        // 环境变量
+            nullptr,                        // 当前目录
+            &si,                            // 启动信息
+            &pi                             // 进程信息
+    )) {
+        // 等待进程结束
+        WaitForSingleObject(pi.hProcess, INFINITE);
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+    } else {
+        std::cerr << "Failed to launch program. Error: " << GetLastError() << std::endl;
     }
 }
 

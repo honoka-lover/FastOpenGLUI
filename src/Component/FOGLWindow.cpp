@@ -27,6 +27,25 @@ FOGLWindow::FOGLWindow(int width, int height, const std::string &title):
         throw std::runtime_error("Failed to create GLFW window");
     }
 
+    // 获取主显示器和视频模式
+    GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *videoMode = glfwGetVideoMode(primaryMonitor);
+    if (!primaryMonitor || !videoMode)
+    {
+        glfwTerminate();
+        throw std::runtime_error("Failed to get monitor or video mode");
+    }
+
+    // 计算居中位置
+    int screenWidth = videoMode->width;
+    int screenHeight = videoMode->height;
+    int posX = (screenWidth - width) / 2;
+    int posY = (screenHeight - height) / 2;
+
+    // 设置窗口位置
+    glfwSetWindowPos(window, posX, posY);
+
+
     glfwMakeContextCurrent(window);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
