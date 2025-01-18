@@ -26,6 +26,7 @@ add_library(FOGLLib STATIC
         ${CMAKE_SOURCE_DIR}/src/Component/FOGLWindow.cpp
         ${CMAKE_SOURCE_DIR}/src/Component/FOGLProgressBar.cpp
         ${CMAKE_SOURCE_DIR}/src/Component/Timer.cpp
+        src/test/main.cpp
 )
 
 target_include_directories(FOGLLib PRIVATE
@@ -53,12 +54,18 @@ target_link_libraries(FOGLLib PRIVATE
         Shlwapi
         Shell32
         psapi
+        ws2_32
+        wldap32
+        crypt32
         ${CMAKE_SOURCE_DIR}/lib/bz2.lib
         ${CMAKE_SOURCE_DIR}/lib/lzma.lib
         ${CMAKE_SOURCE_DIR}/lib/lz4.lib
         ${CMAKE_SOURCE_DIR}/lib/zstd.lib
         ${CMAKE_SOURCE_DIR}/lib/zlib.lib
         ${CMAKE_SOURCE_DIR}/lib/archive.lib
+        ${CMAKE_SOURCE_DIR}/lib/libcurl.lib
+        ${CMAKE_SOURCE_DIR}/lib/libssl.lib
+        ${CMAKE_SOURCE_DIR}/lib/libcrypto.lib
         ${LIBS}
 )
 
@@ -67,3 +74,4 @@ set_property(TARGET FOGLLib PROPERTY
 
 add_subdirectory(src/InstallWindow)
 add_subdirectory(src/UninstallWindow)
+add_subdirectory(src/test)
