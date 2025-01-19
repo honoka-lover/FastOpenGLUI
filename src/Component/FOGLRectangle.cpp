@@ -28,14 +28,13 @@ static const char *fragmentShaderSource = R"(
 #version 330 core
 out vec4 FragColor;
 in vec2 TexCoords;
-in vec2 TextCoords;
-uniform vec2 resolution;  // 按钮分辨率
+in vec2 TextCoords;       // 存放图片四个角位置
+uniform vec2 resolution;  // 按钮宽高
 uniform vec4 buttonColor; // 按钮颜色
 uniform float radius;     // 圆角半径
-uniform vec2 screenSize; // 屏幕尺寸
 uniform vec2 pos;
 uniform sampler2D backgroundTexture;
-uniform bool useBackTexture;
+uniform bool useBackTexture;    //是否使用背景图
 float minDistanceToCorner(vec2 point, vec2 A, vec2 B, vec2 C, vec2 D) {
     // 计算点到每个角的距离
     float distA = length(point - A);
@@ -48,6 +47,10 @@ float minDistanceToCorner(vec2 point, vec2 A, vec2 B, vec2 C, vec2 D) {
 }
 
 void main() {
+    vec4 resultColor = buttonColor;
+    if(useBackTexture)
+        resultColor = texture(backgroundTexture, TextCoords);
+
     // 将纹理坐标从 [0, 1] 映射到按钮的局部坐标系
     vec2 localCoord = TexCoords;
 
@@ -58,33 +61,16 @@ void main() {
 
     if((localCoord.x > pos1.x  && localCoord.x < pos4.x && localCoord.y >= pos.y && localCoord.y <= pos.y+ resolution.y)
     ||( localCoord.y > pos1.y && localCoord.y < pos2.y && localCoord.x >= pos.x && localCoord.x <= pos.x + resolution.x)){
-        if(useBackTexture){
-            vec4 texColor = texture(backgroundTexture, TextCoords);
-            if (texColor.a < 0.1) {
-                discard; // 丢弃透明区域
-            }
-            FragColor = texColor;
-        }else{
-            FragColor = buttonColor;
-        }
+        FragColor = resultColor;
         return;
     }
 
     //寻找最近的点
     float point = minDistanceToCorner(localCoord, pos1, pos2,pos3,pos4);
 
-    if(point > radius)
-        discard;
-
-    if(useBackTexture){
-        vec4 texColor = texture(backgroundTexture, TextCoords);
-        if (texColor.a < 0.1) {
-            discard; // 丢弃透明区域
-        }
-        FragColor = texColor;
-    }else{
-        FragColor = buttonColor;
-    }
+    // 计算透明度（抗锯齿平滑效果）
+    float alpha = 1.0 - smoothstep(radius - 1.0, radius, point);
+    FragColor = vec4(resultColor.rgb, alpha * resultColor.a);
 }
 )";
 

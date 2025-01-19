@@ -159,7 +159,7 @@ void UninstallWindow::initButton()
         return true;
     });
 
-    backgroundRect = createRectangle(0.0f, 0.0f, (float)windowWidth, (float)windowHeight, 4.0f, "#000000");
+    backgroundRect = createRectangle(0.0f, 0.0f, (float)windowWidth, (float)windowHeight, 0.0f, "#000000");
 
     backgroundRect->setBackgroundSource(IDR_BACKGROUND);
 
@@ -171,10 +171,6 @@ void UninstallWindow::initButton()
         return true;
     });
     welComeButton->setVisible(false);
-
-    backgroundRect = createRectangle(0.0f, 0.0f, (float)windowWidth, (float)windowHeight, 4.0f, "#000000");
-
-    backgroundRect->setBackgroundSource(IDR_BACKGROUND);
 
     progressBar = createProgressBar(100,480,700,16,8,"#ffffff");
     progressBar->setInnerProgressColor("#51CCFB");
