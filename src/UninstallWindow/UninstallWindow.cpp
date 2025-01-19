@@ -130,7 +130,7 @@ void UninstallWindow::initButton()
     minimizeButton->setBackgroundSource(IDR_MINIMIZEPNG);
     minimizeButton->setHoverBackgroundSource(IDR_MINIMIZEHOVERPNG);
     minimizeButton->setEventClickFunc([this](){
-        minimizal();
+        minimazal();
 //            minimizeButton->resize(200,200);
 //        minimizeButton->move(-20,0);
         return true;

@@ -23,9 +23,8 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 #ifdef _WIN32
     attachToConsoleIfAvailable();  // 尝试附加到现有控制台
 #endif
-    std::cout<<"hell";
     // 设置全局区域为 UTF-8
-    std::locale::global(std::locale("en_US.UTF-8"));
+//    std::locale::global(std::locale("en_US.UTF-8"));
     try
     {
         InstallWindow window(880, 580, "Custom Window");

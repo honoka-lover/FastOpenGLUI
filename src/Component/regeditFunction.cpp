@@ -158,7 +158,7 @@ bool CreateShortcut(const std::filesystem::path& shortcutPath, const std::filesy
     }
 
     // 设置快捷方式的目标路径
-    pShellLink->SetPath(UTF8ToGB2312(targetPath.u8string()).c_str());
+    pShellLink->SetPath(targetPath.string().c_str());
     // 设置快捷方式的描述
     if (!description.empty()) {
         pShellLink->SetDescription(description.c_str());
@@ -192,7 +192,7 @@ bool CreateShortcut(const std::filesystem::path& shortcutPath, const std::filesy
     return SUCCEEDED(hr);
 }
 
-void WriteInstallData(const std::filesystem::path installPath){
+void WriteInstallData(const std::filesystem::path & installPath){
     const std::wstring REG_UNINST_NODE = L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\"+ SOFT_TYPE;
 
     WriteToRegistry(HKEY_CURRENT_USER,L"SOFTWARE\\"+ SOFT_TYPE,L"installName",GetProgramName());
@@ -247,7 +247,7 @@ void DeleteInstallData(){
 
     std::wstring installPath = RemoveUninstallSuffix(uninstallProgramPath);
     fs::path installpt = installPath + L"\\" +SOFT_EXENAME;
-    std::string exePath = UTF8ToGB2312(installpt.u8string());
+    std::string exePath = UTF8ToGB2312(installpt.string());
     KillProcessByPath(exePath);
 
     DeleteRegistryKey(HKEY_CURRENT_USER,L"SOFTWARE\\"+ SOFT_TYPE);

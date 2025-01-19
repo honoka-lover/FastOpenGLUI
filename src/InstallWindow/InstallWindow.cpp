@@ -162,7 +162,7 @@ void InstallWindow::initButton()
     minimizeButton->setHoverBackgroundSource(IDR_MINIMIZEHOVERPNG);
 
     minimizeButton->setEventClickFunc([this](){
-        minimizal();
+        minimazal();
         return true;
     });
 

@@ -24,7 +24,7 @@ public:
 
     virtual void close();
 
-    virtual void minimizal();
+    virtual void minimazal();
 
     [[nodiscard]] float getWidth() const { return (float)windowWidth; }
     [[nodiscard]] float getHeight() const { return (float)windowHeight; }

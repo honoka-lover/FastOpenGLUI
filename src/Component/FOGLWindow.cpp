@@ -194,7 +194,7 @@ bool FOGLWindow::notify() {
     return false;
 }
 
-void FOGLWindow::minimizal() {
+void FOGLWindow::minimazal() {
     glfwIconifyWindow(window);
 }
 
