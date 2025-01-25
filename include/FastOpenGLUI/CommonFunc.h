@@ -18,6 +18,8 @@ bool EnsureDirectoryExists(const fs::path& directoryPath);
 // 解压7z到指定目录
 void extract_7z(const fs::path& archive_path, const fs::path& output_dir,const std::function<void(float)> & callback);
 
+void extract_7z_UseBit7z(const fs::path& archive_path, const fs::path& output_dir,const std::function<void(float)> & callback);
+
 // 从资源文件解压7z到指定目录
 void Extract7zResourceWithProgress(int resourcesId,const fs::path& outPath, const std::function<void(float)> & callback);
 

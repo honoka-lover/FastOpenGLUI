@@ -15,6 +15,8 @@
 #include <TlHelp32.h>
 #include <psapi.h>
 #include "shellapi.h"
+#include "bit7z/bit7z.hpp"
+#include "resource.h"
 // 确保目标目录存在
 bool EnsureDirectoryExists(const fs::path& directoryPath) {
     try {
@@ -198,7 +200,7 @@ void Extract7zResourceWithProgress(int resourcesId,const fs::path& outPath,const
     if(!exists(outPath))
         create_directories(outPath);
     extract_7z(tempFilePath, outPath,callback);
-
+//    extract_7z_UseBit7z(tempFilePath, outPath,callback);
     // 删除缓存文件
     if (fs::exists(tempFilePath)) {
         fs::remove(tempFilePath);
@@ -529,3 +531,90 @@ void deleteSelf() {
 
     ExitProcess(0); // 退出程序
 }
+
+// 获取 AppData 目录路径
+std::string getAppDataPath() {
+    char path[MAX_PATH];
+    if (SUCCEEDED(SHGetFolderPathA(NULL, CSIDL_APPDATA, NULL, 0, path))) {
+        return std::string(path) + "\\Temp\\";  // 你的程序专用目录
+    }
+    return "";
+}
+
+// 从资源中提取文件
+bool extractResourceToAppData(int resourceId, const std::string& outputFileName) {
+    std::string appDataPath = getAppDataPath();
+    if (appDataPath.empty()) {
+        std::cerr << "无法获取 AppData 目录" << std::endl;
+        return false;
+    }
+
+    // 确保目录存在
+    CreateDirectoryA(appDataPath.c_str(), NULL);
+
+    // 获取当前模块的实例句柄
+    HMODULE hModule = GetModuleHandle(nullptr);
+
+    // 资源处理
+    HRSRC hRes = FindResource(hModule, MAKEINTRESOURCE(resourceId), TEXT("BINARY"));
+    if (!hRes) {
+        std::cerr << "无法找到资源 ID: " << resourceId << std::endl;
+        return false;
+    }
+
+    HGLOBAL hData = LoadResource(NULL, hRes);
+    if (!hData) {
+        std::cerr << "加载资源失败" << std::endl;
+        return false;
+    }
+
+    DWORD dataSize = SizeofResource(NULL, hRes);
+    void* pData = LockResource(hData);
+    if (!pData || dataSize == 0) {
+        std::cerr << "无法锁定资源" << std::endl;
+        return false;
+    }
+
+    std::string outputFilePath = appDataPath + outputFileName;
+    std::ofstream outFile(outputFilePath, std::ios::binary);
+    if (!outFile) {
+        std::cerr << "无法创建文件: " << outputFilePath << std::endl;
+        return false;
+    }
+
+    outFile.write(static_cast<const char*>(pData), dataSize);
+    outFile.close();
+
+    std::cout << "资源提取成功: " << outputFilePath << std::endl;
+    return true;
+}
+
+//void extract_7z_UseBit7z(const fs::path &archive_path, const fs::path &output_dir,
+//                         const std::function<void(float)> &callback) {
+//    const std::string fileName = "7z.dll";
+//
+//    if (extractResourceToAppData(RES_7Z_DLL, fileName)) {
+//        try {
+//            // 指定 7z.dll 的路径
+//            const std::string sevenZipPath = getAppDataPath()+"7z.dll";
+//
+//            // 创建解压对象
+//            bit7z::Bit7zLibrary lib(sevenZipPath);
+//            bit7z::BitFileExtractor extractor(lib, bit7z::BitFormat::Zip);
+//
+//            // 执行解压
+//            extractor.extract(archive_path.string().c_str(), output_dir.string().c_str());
+//
+//            std::cout << "解压完成！" << std::endl;
+//
+//            std::filesystem::remove(sevenZipPath);
+//        }
+//        catch (const std::exception& e) {
+//            std::cerr << "解压失败: " << e.what() << std::endl;
+//            return ;
+//        }
+//    } else {
+//        std::cerr << "解压失败" << std::endl;
+//    }
+//
+//}

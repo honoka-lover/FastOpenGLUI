@@ -1,0 +1,3 @@
+#include "resource.h"
+
+RES_7Z_DLL BIN "7z.dll"
