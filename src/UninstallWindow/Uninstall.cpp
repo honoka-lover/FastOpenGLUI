@@ -24,7 +24,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 #endif
 
     // 设置全局区域为 UTF-8
-    std::locale::global(std::locale("en_US.UTF-8"));
+//    std::locale::global(std::locale("en_US.UTF-8"));
     try
     {
         UninstallWindow window(880, 580, "Custom Window");

@@ -91,7 +91,7 @@ void extract_7z(const fs::path& archive_path, const fs::path& output_dir,const s
 
         // 设置解压路径
         fs::path full_output_path = output_dir / current_file;
-        archive_entry_set_pathname(entry, full_output_path.string().c_str());
+        archive_entry_copy_pathname_w(entry, full_output_path.wstring().c_str());
 
         // 解压
         if ((result = archive_write_header(extract, entry)) != ARCHIVE_OK) {
@@ -189,9 +189,6 @@ void Extract7zResourceWithProgress(int resourcesId,const fs::path& outPath,const
         // 更新进度
         int progress = static_cast<int>((static_cast<double>(writtenBytes) / resSize) * 100);
         std::cout << "Writing to cache: " << progress << "%\r" << std::flush;
-
-        // 模拟延迟（仅用于演示进度）
-
     }
 
     cacheFile.close();

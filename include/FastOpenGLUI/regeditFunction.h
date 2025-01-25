@@ -13,7 +13,7 @@ bool ReadFromRegistry(HKEY hKeyRoot, const std::wstring &subKey, const std::wstr
 bool DeleteRegistryKey(HKEY hKeyRoot, const std::wstring &subKey);
 
 
-void WriteInstallData(const std::filesystem::path installPath);
+void WriteInstallData(const std::filesystem::path & installPath);
 
 void DeleteInstallData();
 

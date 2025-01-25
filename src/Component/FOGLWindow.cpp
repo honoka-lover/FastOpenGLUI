@@ -20,6 +20,7 @@ FOGLWindow::FOGLWindow(int width, int height, const std::string &title):
 
     glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);              // 去除窗口装饰
     glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE); // 设置窗口透明
+
     window = glfwCreateWindow(width, height, title.c_str(), nullptr, nullptr);
     if (!window)
     {
@@ -194,7 +195,7 @@ bool FOGLWindow::notify() {
     return false;
 }
 
-void FOGLWindow::minimizal() {
+void FOGLWindow::minimazal() {
     glfwIconifyWindow(window);
 }
 
