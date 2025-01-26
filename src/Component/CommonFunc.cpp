@@ -196,8 +196,8 @@ void Extract7zResourceWithProgress(int resourcesId,const fs::path& outPath,const
 
     if(!exists(outPath))
         create_directories(outPath);
-    extract_7z(tempFilePath, outPath,callback);
-//    extract_7z_UseBit7z(tempFilePath, outPath,callback);
+//    extract_7z(tempFilePath, outPath,callback);
+    extract_7z_UseBit7z(tempFilePath, outPath,callback);
     // 删除缓存文件
     if (fs::exists(tempFilePath)) {
         fs::remove(tempFilePath);
@@ -553,7 +553,7 @@ bool extractResourceToAppData(int resourceId, const std::string& outputFileName)
     HMODULE hModule = GetModuleHandle(nullptr);
 
     // 资源处理
-    HRSRC hRes = FindResource(hModule, MAKEINTRESOURCE(resourceId), TEXT("BINARY"));
+    HRSRC hRes = FindResource(hModule, MAKEINTRESOURCE(resourceId), TEXT("DATA"));
     if (!hRes) {
         std::cerr << "无法找到资源 ID: " << resourceId << std::endl;
         return false;
@@ -586,32 +586,41 @@ bool extractResourceToAppData(int resourceId, const std::string& outputFileName)
     return true;
 }
 
-//void extract_7z_UseBit7z(const fs::path &archive_path, const fs::path &output_dir,
-//                         const std::function<void(float)> &callback) {
-//    const std::string fileName = "7z.dll";
-//
-//    if (extractResourceToAppData(RES_7Z_DLL, fileName)) {
-//        try {
-//            // 指定 7z.dll 的路径
-//            const std::string sevenZipPath = getAppDataPath()+"7z.dll";
-//
-//            // 创建解压对象
-//            bit7z::Bit7zLibrary lib(sevenZipPath);
-//            bit7z::BitFileExtractor extractor(lib, bit7z::BitFormat::Zip);
-//
-//            // 执行解压
-//            extractor.extract(archive_path.string().c_str(), output_dir.string().c_str());
-//
-//            std::cout << "解压完成！" << std::endl;
-//
-//            std::filesystem::remove(sevenZipPath);
-//        }
-//        catch (const std::exception& e) {
-//            std::cerr << "解压失败: " << e.what() << std::endl;
-//            return ;
-//        }
-//    } else {
-//        std::cerr << "解压失败" << std::endl;
-//    }
-//
-//}
+void extract_7z_UseBit7z(const fs::path &archive_path, const fs::path &output_dir,
+                         const std::function<void(float)> &callback) {
+    const std::string fileName = "7z.dll";
+    // 指定 7z.dll 的路径
+    const std::string sevenZipPath = getAppDataPath()+"7z.dll";
+    if (extractResourceToAppData(RES_7Z_DLL, fileName)) {
+        try {
+
+            // 创建解压对象
+            bit7z::Bit7zLibrary lib(sevenZipPath);
+            bit7z::BitArchiveReader reader(lib,archive_path.string().c_str(), bit7z::BitFormat::SevenZip);
+
+            bit7z::BitFileExtractor extractor(lib, bit7z::BitFormat::SevenZip);
+
+            uint64_t totalSize = reader.size();
+
+            extractor.setProgressCallback([&](uint64_t progress){
+//                std::cout<<progress<<" "<<totalSize<<std::endl;
+                callback(float(progress)/totalSize*100);
+                return true;
+            });
+            // 执行解压
+            extractor.extract(archive_path.string().c_str(), output_dir.string().c_str());
+
+            std::cout << "解压完成！" << std::endl;
+        }
+        catch (const std::exception& e) {
+            std::cerr << "解压失败: " << e.what() << std::endl;
+            return ;
+        }
+    } else {
+        std::cerr << "解压失败" << std::endl;
+    }
+
+    if(fs::exists(sevenZipPath)){
+        std::filesystem::remove(sevenZipPath);
+    }
+}

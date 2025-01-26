@@ -1,4 +1,6 @@
 #include "../src/InstallWindow/InstallResources.h"
+#include "resource.h"
+RES_7Z_DLL DATA "7z.dll"
 
 IDR_BACKGROUND IMAGE "images/background.png"
 IDR_CLOSEPNG IMAGE "images/close.png"
