@@ -100,8 +100,8 @@ void UninstallWindow::render()
 
     progressBar->draw();
     if(progressBar->visible()){
-        if(currentValue < 90.0f)
-            currentValue.store(currentValue.load() + 0.1f);
+        if(currentValue < 98.0f)
+            currentValue.store(currentValue.load() + 0.7f);
         progressBar->setValue(currentValue.load()/100);
         centerText->RenderText(L"卸载中...", uninstallButton->x + 65, uninstallButton->y + 140, 1.0f, 18, glm::vec3(0.0f, 0.0f, 0.0f));
     }

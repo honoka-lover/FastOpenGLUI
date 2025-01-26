@@ -30,6 +30,7 @@ bool EnsureDirectoryExists(const fs::path& directoryPath) {
     }
 }
 
+/* //不兼容win7
 void extract_7z(const fs::path& archive_path, const fs::path& output_dir,const std::function<void(float)> & callback) {
     struct archive* archive;
     struct archive* extract;
@@ -133,6 +134,7 @@ void extract_7z(const fs::path& archive_path, const fs::path& output_dir,const s
     archive_write_free(extract);
 }
 
+ */
 void Extract7zResourceWithProgress(int resourcesId,const fs::path& outPath,const std::function<void(float)> & callback) {
     // 获取 AppData 缓存路径
     char* appDataPath = nullptr;

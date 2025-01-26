@@ -15,9 +15,10 @@ namespace fs = std::filesystem;
 // 确保目标目录存在
 bool EnsureDirectoryExists(const fs::path& directoryPath);
 
-// 解压7z到指定目录
-void extract_7z(const fs::path& archive_path, const fs::path& output_dir,const std::function<void(float)> & callback);
+// 解压7z到指定目录 从lib中去掉，因为该库不兼容win7
+//void extract_7z(const fs::path& archive_path, const fs::path& output_dir,const std::function<void(float)> & callback);
 
+// 解压7z到指定目录
 void extract_7z_UseBit7z(const fs::path& archive_path, const fs::path& output_dir,const std::function<void(float)> & callback);
 
 // 从资源文件解压7z到指定目录
@@ -50,4 +51,7 @@ bool KillProcessByPath(const std::string& exePath);
 void LaunchExe(const std::filesystem::path& targetProgramPath);
 
 void deleteSelf();
+
+// 获取 AppData 目录路径
+std::string getAppDataPath();
 #endif //FASTOPENGLUI_COMMONFUNC_H

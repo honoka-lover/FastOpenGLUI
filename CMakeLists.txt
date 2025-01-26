@@ -65,7 +65,6 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
             ${CMAKE_SOURCE_DIR}/lib/debug/freetyped.lib
             ${CMAKE_SOURCE_DIR}/lib/debug/glfw3.lib
             ${CMAKE_SOURCE_DIR}/lib/debug/bit7z64_d.lib
-#            ${CMAKE_SOURCE_DIR}/lib/debug/7zip.lib
     )
 endif()
 target_link_libraries(FOGLLib PRIVATE
@@ -76,12 +75,12 @@ target_link_libraries(FOGLLib PRIVATE
         ws2_32
         wldap32
         crypt32
-        ${CMAKE_SOURCE_DIR}/lib/bz2.lib
-        ${CMAKE_SOURCE_DIR}/lib/lzma.lib
-        ${CMAKE_SOURCE_DIR}/lib/lz4.lib
-        ${CMAKE_SOURCE_DIR}/lib/zstd.lib
-        ${CMAKE_SOURCE_DIR}/lib/zlib.lib
-        ${CMAKE_SOURCE_DIR}/lib/archive.lib
+#        ${CMAKE_SOURCE_DIR}/lib/bz2.lib
+#        ${CMAKE_SOURCE_DIR}/lib/lzma.lib
+#        ${CMAKE_SOURCE_DIR}/lib/lz4.lib
+#        ${CMAKE_SOURCE_DIR}/lib/zstd.lib
+#        ${CMAKE_SOURCE_DIR}/lib/zlib.lib
+#        ${CMAKE_SOURCE_DIR}/lib/archive.lib
         ${CMAKE_SOURCE_DIR}/lib/libcurl.lib
         ${CMAKE_SOURCE_DIR}/lib/libssl.lib
         ${CMAKE_SOURCE_DIR}/lib/libcrypto.lib
