@@ -18,12 +18,27 @@ int main() {
         bit7z::BitExtractor<std::string> extractor{ lib,bit7z::BitFormat::Auto};
 
         // 要解压的文件
-        std::string rarFile = "D:/test.rar";
+        std::string rarFile = "D:/test.7z";
 
         // 目标解压目录
         std::string outputDir = "D:/test1";
 
         bit7z::BitArchiveReader reader(lib,rarFile, bit7z::BitFormat::Auto);
+
+        extractor.setPassword("11");
+        try {
+            extractor.test(rarFile); // 仅测试，不解压
+        } catch (const bit7z::BitException& e) {
+            std::string errorMsg = e.what();
+            if (errorMsg.find("wrong password") != std::wstring::npos ||
+                errorMsg.find("incorrect password") != std::wstring::npos ||
+                    errorMsg.find("password is required but none was provided") != std::wstring::npos) {
+                std::cout<<errorMsg<<std::endl;
+                std::cout << "该文件需要密码！" << std::endl;
+            } else {
+                std::cout << "文件测试失败: " << errorMsg << std::endl;
+            }
+        }
 
 
         uint64_t totalSize = reader.size();
@@ -33,8 +48,11 @@ int main() {
             std::cout<<(float(progress)/totalSize*100)<<std::endl;
             return true;
         });
+
+
+
         // 执行解压
-        extractor.extract(rarFile, outputDir);
+//        extractor.extract(rarFile, outputDir);
 
         std::cout << "RAR 解压完成！" << std::endl;
     } catch (const std::exception& e) {
