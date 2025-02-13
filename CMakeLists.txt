@@ -64,7 +64,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     file(GLOB LIBS
             ${CMAKE_SOURCE_DIR}/lib/debug/freetyped.lib
             ${CMAKE_SOURCE_DIR}/lib/debug/glfw3.lib
-            ${CMAKE_SOURCE_DIR}/lib/debug/bit7z64_d.lib
+            ${CMAKE_SOURCE_DIR}/lib/debug/bit7z.lib
     )
 endif()
 target_link_libraries(FOGLLib PRIVATE
