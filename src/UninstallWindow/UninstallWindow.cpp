@@ -4,7 +4,6 @@
 #include <chrono>
 #include <thread>
 #include <fstream>
-#include <ShlObj_core.h>
 #include "UninstallResources.h"
 #include "filesystem"
 #include "FastOpenGLUI/soft_info.h"

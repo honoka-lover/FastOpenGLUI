@@ -38,7 +38,6 @@ add_library(FOGLLib STATIC
         ${CMAKE_SOURCE_DIR}/src/Component/FOGLWindow.cpp
         ${CMAKE_SOURCE_DIR}/src/Component/FOGLProgressBar.cpp
         ${CMAKE_SOURCE_DIR}/src/Component/Timer.cpp
-        src/test/main.cpp
 )
 
 
@@ -52,43 +51,71 @@ target_include_directories(FOGLLib PRIVATE
         ${CMAKE_SOURCE_DIR}/include/FastOpenGLUI
 )
 
+if(MSVC)
+    # 检测当前构建模式
+    if(CMAKE_BUILD_TYPE STREQUAL "Release")
+        set(FOGL_LIBS
+                ${CMAKE_SOURCE_DIR}/lib/MSVC/release/freetype.lib
+                ${CMAKE_SOURCE_DIR}/lib/MSVC/release/glfw3.lib
+                ${CMAKE_SOURCE_DIR}/lib/MSVC/release/bit7z64.lib
+        )
+    elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(FOGL_LIBS
+                ${CMAKE_SOURCE_DIR}/lib/MSVC/debug/freetyped.lib
+                ${CMAKE_SOURCE_DIR}/lib/MSVC/debug/glfw3.lib
+                ${CMAKE_SOURCE_DIR}/lib/MSVC/debug/bit7z.lib
 
-# 检测当前构建模式
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    file(GLOB LIBS
-            ${CMAKE_SOURCE_DIR}/lib/release/freetype.lib
-            ${CMAKE_SOURCE_DIR}/lib/release/glfw3.lib
-            ${CMAKE_SOURCE_DIR}/lib/release/bit7z64.lib
+        )
+    endif()
+    set(FOGL_LIBS
+            ${FOGL_LIBS}
+            ${CMAKE_SOURCE_DIR}/lib/MSVC/libcurl.lib
+            ${CMAKE_SOURCE_DIR}/lib/MSVC/libssl.lib
+            ${CMAKE_SOURCE_DIR}/lib/MSVC/libcrypto.lib
     )
-elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    file(GLOB LIBS
-            ${CMAKE_SOURCE_DIR}/lib/debug/freetyped.lib
-            ${CMAKE_SOURCE_DIR}/lib/debug/glfw3.lib
-            ${CMAKE_SOURCE_DIR}/lib/debug/bit7z.lib
+    target_link_libraries(FOGLLib PRIVATE
+            opengl32
+            Shlwapi
+            Shell32
+            psapi
+            ws2_32
+            wldap32
+            crypt32
+            ${FOGL_LIBS}
     )
-endif()
-target_link_libraries(FOGLLib PRIVATE
-        opengl32
-        Shlwapi
-        Shell32
-        psapi
-        ws2_32
-        wldap32
-        crypt32
-#        ${CMAKE_SOURCE_DIR}/lib/bz2.lib
-#        ${CMAKE_SOURCE_DIR}/lib/lzma.lib
-#        ${CMAKE_SOURCE_DIR}/lib/lz4.lib
-#        ${CMAKE_SOURCE_DIR}/lib/zstd.lib
-#        ${CMAKE_SOURCE_DIR}/lib/zlib.lib
-#        ${CMAKE_SOURCE_DIR}/lib/archive.lib
-        ${CMAKE_SOURCE_DIR}/lib/libcurl.lib
-        ${CMAKE_SOURCE_DIR}/lib/libssl.lib
-        ${CMAKE_SOURCE_DIR}/lib/libcrypto.lib
-        ${LIBS}
-)
 
-set_property(TARGET FOGLLib PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    set_property(TARGET FOGLLib PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif ()
 
+if(MINGW)
+     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -static-libgcc -pthread")
+     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static")
+
+     if(CMAKE_BUILD_TYPE STREQUAL "Release")
+         set(FOGL_LIBS
+                 ${CMAKE_SOURCE_DIR}/lib/MINGW/libbit7z64.a
+         )
+     elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+         set(FOGL_LIBS
+                 ${CMAKE_SOURCE_DIR}/lib/MINGW/libbit7z64_d.a
+         )
+     endif()
+     set(FOGL_LIBS ${FOGL_LIBS}
+             ${CMAKE_SOURCE_DIR}/lib/MINGW/libfreetype.a
+             ${CMAKE_SOURCE_DIR}/lib/MINGW/libglfw3.a
+     )
+
+    target_link_libraries(FOGLLib PRIVATE
+            opengl32
+            Shlwapi
+            Shell32
+            psapi
+            ws2_32
+            wldap32
+            crypt32
+            ${FOGL_LIBS}
+    )
+endif ()
 
 add_subdirectory(src/InstallWindow)
 add_subdirectory(src/UninstallWindow)

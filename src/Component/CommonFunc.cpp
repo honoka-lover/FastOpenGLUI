@@ -6,12 +6,10 @@
 #include "stb_image.h"
 #include "CommonFunc.h"
 #include "string"
-#include "archive_entry.h"
-#include "archive.h"
 #include "iostream"
 #include "fstream"
 #include "Shlwapi.h"
-#include <ShlObj_core.h>
+#include <ShlObj.h>
 #include <TlHelp32.h>
 #include <psapi.h>
 #include "shellapi.h"
@@ -135,16 +133,16 @@ void extract_7z(const fs::path& archive_path, const fs::path& output_dir,const s
 }
 
  */
+
 void Extract7zResourceWithProgress(int resourcesId,const fs::path& outPath,const std::function<void(float)> & callback) {
     // 获取 AppData 缓存路径
-    char* appDataPath = nullptr;
-    size_t len = 0;
-    if (_dupenv_s(&appDataPath, &len, "APPDATA") != 0 || appDataPath == nullptr) {
+    const char* appDataPath = std::getenv("APPDATA");
+    if (appDataPath == nullptr) {
         std::cerr << "Failed to get AppData path." << std::endl;
         return;
     }
+
     fs::path tempFilePath = fs::path(appDataPath) / "Temp7zCache.7z";
-    free(appDataPath);
 
     // 确保缓存路径所在目录存在
     if (!EnsureDirectoryExists(tempFilePath.parent_path())) {
@@ -153,7 +151,7 @@ void Extract7zResourceWithProgress(int resourcesId,const fs::path& outPath,const
     }
 
     // 找到资源
-    HRSRC hRes = FindResource(NULL, MAKEINTRESOURCE(resourcesId), TEXT("7Z"));
+    HRSRC hRes = FindResource(NULL, MAKEINTRESOURCE(resourcesId), TEXT("DATA"));
     if (!hRes) {
         std::cerr << "Failed to find resource." << std::endl;
         return;

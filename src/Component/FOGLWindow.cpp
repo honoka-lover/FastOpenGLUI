@@ -2,7 +2,7 @@
 // Created by m1393 on 2025/1/11.
 //
 #include "FOGLWindow.h"
-
+#include "algorithm"
 FOGLWindow::FOGLWindow(int width, int height, const std::string &title):
         windowWidth(width)
         , windowHeight(height)

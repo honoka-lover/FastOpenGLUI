@@ -10,5 +10,5 @@ IDR_MINIMIZEHOVERPNG IMAGE "images/hide1.png"
 
 IDI_ICON1 ICON "images/blueScreen.ico"
 
-RES_DATA 7Z "res.7z"
+RES_DATA DATA "res.7z"
 

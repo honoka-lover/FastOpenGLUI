@@ -1,8 +1,6 @@
 ﻿#include "InstallWindow.h"
 #include <iostream>
 
-#include "archive_entry.h"
-#include "archive.h"
 #include <locale>
 
 void attachToConsoleIfAvailable()
