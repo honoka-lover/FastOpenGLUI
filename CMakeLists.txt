@@ -23,6 +23,8 @@ include_directories(
         src/regeditModel
         ${CMAKE_SOURCE_DIR}/include
         ${CMAKE_SOURCE_DIR}/include/FastOpenGLUI
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/imgui
+        ${CMAKE_CURRENT_SOURCE_DIR}/include/imgui/backends
 )
 
 ## 查找 GLFW 静态库
@@ -120,3 +122,4 @@ endif ()
 add_subdirectory(src/InstallWindow)
 add_subdirectory(src/UninstallWindow)
 add_subdirectory(src/test)
+add_subdirectory(src/imguiSample)

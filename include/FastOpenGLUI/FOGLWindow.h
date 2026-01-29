@@ -32,7 +32,7 @@ public:
 
     void setFrameRate(double time);
 
-    GLFWwindow* getGLFWwindowPointer(){ return window;}
+    GLFWwindow* getGLFWwindowPointer() const { return window;}
 
 protected:
     GLFWwindow *window;
