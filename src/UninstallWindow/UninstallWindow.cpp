@@ -6,7 +6,7 @@
 #include <fstream>
 #include "UninstallResources.h"
 #include "filesystem"
-#include "../FOGLLib/soft_info.h"
+#include "../../include/InstallHeader/soft_info.h"
 #include "UninstallResources.h"
 #include "../FOGLLib/regeditFunction.h"
 

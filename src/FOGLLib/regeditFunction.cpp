@@ -1,5 +1,5 @@
 ﻿#include "regeditFunction.h"
-#include "soft_info.h"
+#include "../../include/InstallHeader/soft_info.h"
 #include <shlobj.h>
 #include "CommonFunc.h"
 #include <shlwapi.h>

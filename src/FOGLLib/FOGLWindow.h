@@ -1,5 +1,5 @@
 ﻿//
-// Created by m1393 on 2025/1/11.
+// Created by honoka on 2025/1/11.
 //
 
 #ifndef FASTOPENGLUI_FOGLWINDOW_H

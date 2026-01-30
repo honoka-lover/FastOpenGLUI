@@ -1,11 +1,11 @@
 ﻿//
-// Created by m1393 on 2026/1/29.
+// Created by honoka on 2026/1/29.
 //
 
 #include "FoglSample.h"
 
 #include "../FOGLLib/regeditFunction.h"
-#include "../FOGLLib/soft_info.h"
+#include "../../include/InstallHeader/soft_info.h"
 #include "../InstallWindow/InstallResources.h"
 
 #include "imgui.h"

@@ -19,8 +19,3 @@ add_executable(imgUISample WIN32
 target_link_libraries(imgUISample PRIVATE
         FOGLLib
 )
-
-if(MSVC)
-    set_property(TARGET imgUISample PROPERTY
-            MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-endif ()

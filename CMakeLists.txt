@@ -10,6 +10,7 @@ include(cmake/dependencies.cmake)
 
 include_directories(
         ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/include/InstallHeader
         ${CMAKE_CURRENT_SOURCE_DIR}/include/imgui
         ${CMAKE_CURRENT_SOURCE_DIR}/include/imgui/backends
 )
@@ -18,7 +19,6 @@ include_directories(
 add_subdirectory(src/FOGLLib)
 add_subdirectory(src/InstallWindow)
 add_subdirectory(src/UninstallWindow)
-add_subdirectory(src/test)
 add_subdirectory(src/imguiSample)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)

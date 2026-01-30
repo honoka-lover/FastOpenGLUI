@@ -1,18 +1,25 @@
 ﻿//
-// Created by m1393 on 2025/1/11.
+// Created by honoka on 2025/1/11.
 //
-#include "glad/glad.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#include "CommonFunc.h"
-#include "string"
-#include "iostream"
-#include "fstream"
-#include "Shlwapi.h"
+
+#define NOMINMAX
+#include <Windows.h>   // 可选，但显式更安全
+
+#include <Shlwapi.h>
 #include <ShlObj.h>
 #include <TlHelp32.h>
 #include <psapi.h>
-#include "shellapi.h"
+#include <shellapi.h>
+
+#include <algorithm>
+#include <string>
+#include <iostream>
+#include <fstream>
+
+#include <glad/glad.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#include "CommonFunc.h"
 #include "bit7z/bit7z.hpp"
 #include "resource.h"
 
@@ -183,7 +190,7 @@ void Extract7zResourceWithProgress(int resourcesId,const fs::path& outPath,const
     size_t writtenBytes = 0;
 
     while (writtenBytes < resSize) {
-        size_t bytesToWrite = std::min(chunkSize, resSize - writtenBytes);
+        size_t bytesToWrite = (chunkSize < (resSize - writtenBytes)) ? chunkSize : (resSize - writtenBytes);
         cacheFile.write(data + writtenBytes, bytesToWrite);
         writtenBytes += bytesToWrite;
 

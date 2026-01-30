@@ -1,5 +1,5 @@
 //
-// Created by m1393 on 2026/1/29.
+// Created by honoka on 2026/1/29.
 //
 
 #ifndef FASTOPENGLUI_FOGLSAMPLE_H

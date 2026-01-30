@@ -6,7 +6,7 @@
 #include <fstream>
 #include "InstallResources.h"
 #include "filesystem"
-#include "soft_info.h"
+#include "../../include/InstallHeader/soft_info.h"
 #include "InstallResources.h"
 #include "regeditFunction.h"
 namespace fs = std::filesystem;

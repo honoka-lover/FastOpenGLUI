@@ -1,5 +1,5 @@
 ﻿//
-// Created by m1393 on 2025/1/14.
+// Created by honoka on 2025/1/14.
 //
 
 #ifndef FASTOPENGLUI_TIMER_H

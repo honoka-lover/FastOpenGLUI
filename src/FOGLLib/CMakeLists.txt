@@ -31,7 +31,7 @@ if(MSVC)
             glm::glm
             freetype
     )
-
+    target_link_libraries(FOGLLib PRIVATE legacy_stdio_definitions)
 endif ()
 
 
