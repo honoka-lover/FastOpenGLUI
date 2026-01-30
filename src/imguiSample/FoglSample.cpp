@@ -4,8 +4,8 @@
 
 #include "FoglSample.h"
 
-#include "regeditFunction.h"
-#include "soft_info.h"
+#include "../FOGLLib/regeditFunction.h"
+#include "../FOGLLib/soft_info.h"
 #include "../InstallWindow/InstallResources.h"
 
 #include "imgui.h"

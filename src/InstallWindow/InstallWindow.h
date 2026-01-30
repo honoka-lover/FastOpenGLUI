@@ -3,10 +3,10 @@
 
 #include <iostream>
 #include <string>
+#include "FOGLWindow.h"
 #include "text_renderer.h"
 #include "FOGLRectangle.h"
 #include "thread"
-#include "FOGLWindow.h"
 #include "CommonFunc.h"
 #include "FOGLProgressBar.h"
 class InstallWindow:public FOGLWindow

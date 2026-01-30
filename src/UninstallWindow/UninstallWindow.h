@@ -3,12 +3,12 @@
 
 #include <iostream>
 #include <string>
-#include "FastOpenGLUI/text_renderer.h"
-#include "FastOpenGLUI/FOGLRectangle.h"
+#include "text_renderer.h"
+#include "FOGLRectangle.h"
 #include "thread"
-#include "FastOpenGLUI/FOGLWindow.h"
-#include "FastOpenGLUI/CommonFunc.h"
-#include "FastOpenGLUI/FOGLProgressBar.h"
+#include "FOGLWindow.h"
+#include "CommonFunc.h"
+#include "FOGLProgressBar.h"
 #include "Timer.h"
 
 class UninstallWindow:public FOGLWindow

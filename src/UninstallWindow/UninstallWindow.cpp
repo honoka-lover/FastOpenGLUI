@@ -6,9 +6,9 @@
 #include <fstream>
 #include "UninstallResources.h"
 #include "filesystem"
-#include "FastOpenGLUI/soft_info.h"
+#include "../FOGLLib/soft_info.h"
 #include "UninstallResources.h"
-#include "regeditFunction.h"
+#include "../FOGLLib/regeditFunction.h"
 
 namespace fs = std::filesystem;
 

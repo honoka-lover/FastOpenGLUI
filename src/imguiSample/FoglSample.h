@@ -7,12 +7,12 @@
 
 #include <iostream>
 #include <string>
-#include "text_renderer.h"
+#include "../FOGLLib/text_renderer.h"
 #include "FOGLRectangle.h"
 #include "thread"
-#include "FOGLWindow.h"
-#include "CommonFunc.h"
-#include "FOGLProgressBar.h"
+#include "../FOGLLib/FOGLWindow.h"
+#include "../FOGLLib/CommonFunc.h"
+#include "../FOGLLib/FOGLProgressBar.h"
 
 class FoglSample :public FOGLWindow{
 public:
