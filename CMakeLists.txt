@@ -17,8 +17,10 @@ include_directories(
 
 
 add_subdirectory(src/FOGLLib)
+add_subdirectory(src/FastOpenGLUILib)
 add_subdirectory(src/InstallWindow)
 add_subdirectory(src/UninstallWindow)
 add_subdirectory(src/imguiSample)
+add_subdirectory(src/demo)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
