@@ -11,19 +11,14 @@
 
 class FOGLHBoxLayout : public FOGLLayout {
 public:
-    float spacing = 4.0f;
 
-    void apply(FOGLWidget* parent) override {
-        float xOffset = 0.0f;
 
-        for (auto& child :  parent->children()) {
-            if (!child->isVisible()) continue;
+    void setSpacing(float spacing);
 
-            FOGLRect geo = child->geometry();
-            child->setGeometry(xOffset, geo.y, geo.width, geo.height);
-            xOffset += geo.width + spacing;
-        }
-    }
+    void apply(FOGLWidget* parent) override;
+
+private:
+    float m_spacing = 4.0f;
 };
 
 

@@ -14,6 +14,10 @@
 void attachToConsoleIfAvailable()
 {
 #ifdef _WIN32
+    //gdb模式不执行
+    if (IsDebuggerPresent()) {
+        return;
+    }
     // 检查当前是否从命令行启动，并尝试附加控制台
     if (AttachConsole(ATTACH_PARENT_PROCESS)) {
         FILE* outStream;
@@ -29,20 +33,21 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     attachToConsoleIfAvailable();  // 尝试附加到现有控制台
 #endif
     // 创建应用
-    FOGLApplication app;
-
+    FOGLApplication::instance().init();
 
     // 创建根窗口
     auto root = std::make_shared<FOGLWidget>("Root Window");
     root->becomeTopLevelWindow();
-    app.addTopLevelWidget(root);
+
+    FOGLWidget widget("test");
+    widget.becomeTopLevelWindow();
 
     // 添加子 Widget
     auto child = std::make_shared<FOGLWidget>("Child Widget");
     root->addChild(child);
 
     // 子 Widget 创建新的顶层窗口
-    child->createNewTopLevelWindow();
+    child->becomeTopLevelWindow();
 
     // 创建子窗口
     auto subWin = std::make_shared<FOGLSubWindow>("Demo SubWindow");
@@ -53,7 +58,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     container->setGeometry(0, 0, 300, 200);
 
     auto layout = std::make_unique<FOGLVBoxLayout>();
-    layout->spacing = 8.0f;
+    layout->setSpacing( 8.0f);
     container->setLayout(std::move(layout));
 
     // 创建按钮
@@ -67,13 +72,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     container->addChild(button);
 
     // 把容器挂到子窗口
-    subWin->addChild(container);
+    subWin->setContainer(container);
 
     // 把子窗口挂到 UI 根节点
     root->addChild(subWin);
 
     // 运行应用
-    app.run();
+    FOGLApplication::instance().run();
 
     return 0;
 }

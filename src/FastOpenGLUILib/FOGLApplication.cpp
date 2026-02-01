@@ -6,6 +6,27 @@
 
 #include <iostream>
 
+FOGLApplication& FOGLApplication::instance() {
+    static FOGLApplication app;
+    return app;
+}
+
+void FOGLApplication::init() {
+}
+
+void FOGLApplication::registerRoot(FOGLWidget * root) {
+    if (!root) return;
+    if (std::find(m_pendingAdd.begin(), m_pendingAdd.end(), root) == m_pendingAdd.end())
+        m_pendingAdd.push_back(root);
+}
+
+void FOGLApplication::unregisterRoot(FOGLWidget *root) {
+    if (!root)
+        return;
+    if (std::find(m_pendingRemove.begin(), m_pendingRemove.end(), root) == m_pendingRemove.end())
+        m_pendingRemove.push_back(root);
+}
+
 FOGLApplication::FOGLApplication() {
     if (!glfwInit())
     {
@@ -67,30 +88,63 @@ void mouseButtonScrollCallback(GLFWwindow* handle, double x,double y) {
     w->onMouseEvent(e);
 }
 
-
-void FOGLApplication::addTopLevelWidget(std::shared_ptr<FOGLWidget> w) {
-    // 自动创建 GLFWwindow 如果还没创建
-    w->setTopLevelRegisterFunc([this](std::shared_ptr<FOGLWidget> w2){
-        addTopLevelWidget(w2); // 递归注册
-    });
-    m_roots.push_back(w);
-    g_windowMap[w->getGLFWwindowPointer()]=w.get();
+void registerEvents(FOGLWidget *w) {
+    g_windowMap[w->getGLFWwindowPointer()]=w;
     glfwSetMouseButtonCallback(w->getGLFWwindowPointer(), mouseButtonCallback);
     glfwSetCursorPosCallback(w->getGLFWwindowPointer(), mouseButtonMoveCallback);
     glfwSetScrollCallback(w->getGLFWwindowPointer(), mouseButtonMoveCallback);
 }
 
+void FOGLApplication::updateRoot() {
+    // ---------- remove ----------
+    if (!m_pendingRemove.empty()) {
+        std::vector<FOGLWidget*> pendingRemove;
+        pendingRemove.swap(m_pendingRemove);
+
+        auto it = std::remove_if(
+            m_roots.begin(),
+            m_roots.end(),
+            [&pendingRemove](FOGLWidget* w) {
+                return std::find(pendingRemove.begin(), pendingRemove.end(), w) != pendingRemove.end();
+            }
+        );
+        m_roots.erase(it, m_roots.end());
+    }
+
+    // ---------- add ----------
+    if (!m_pendingAdd.empty()) {
+        std::vector<FOGLWidget*> pendingAdd;
+        pendingAdd.swap(m_pendingAdd);
+
+        for (auto* w : pendingAdd) {
+            if (!w) continue;
+
+            if (std::find(m_roots.begin(), m_roots.end(), w) != m_roots.end())
+                continue;
+            registerEvents(w);
+            m_roots.push_back(w); // 仅存指针，不增加引用
+        }
+    }
+}
+
+
+
 void FOGLApplication::run() {
-   while (!m_roots.empty()) {
-        // 遍历所有窗口
+   do {
+       updateRoot();
+       // 遍历所有窗口
        // 渲染所有顶层窗口
        for (auto it = m_roots.begin(); it != m_roots.end();) {
-           auto& w = *it;
+           auto w = *it;
            GLFWwindow* win = w->getGLFWwindowPointer();
+           if (!win) {
+               it = m_roots.erase(it);
+               continue;
+           }
            if (glfwWindowShouldClose(win)) {
                // 销毁窗口并移出列表
-               w->close();
                it = m_roots.erase(it);
+               w->close();
            } else {
                // 切换上下文渲染
                glfwMakeContextCurrent(win);
@@ -100,27 +154,9 @@ void FOGLApplication::run() {
            }
        }
 
-       // for (auto it = m_roots.begin(); it != m_roots.end(); ) {
-       //     auto& w = *it;
-       //     GLFWwindow* win = w->getGLFWwindowPointer();
-       //
-       //     if (glfwWindowShouldClose(win)) {
-       //         // 销毁窗口并移出列表
-       //         glfwDestroyWindow(win);
-       //         it = m_windows.erase(it);
-       //     } else {
-       //         // 切换上下文渲染
-       //         glfwMakeContextCurrent(win);
-       //         w->render();
-       //         glfwSwapBuffers(win);
-       //         ++it;
-       //     }
-       // }
+       glfwPollEvents(); // 全局事件轮询
+   }while (!m_roots.empty() || !m_pendingAdd.empty());
 
-
-
-        glfwPollEvents(); // 全局事件轮询
-    }
 
     // 所有窗口关闭后退出
     glfwTerminate();

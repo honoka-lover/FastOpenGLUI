@@ -5,6 +5,8 @@
 #include <iostream>
 #include <memory>
 
+#include "FOGLApplication.h"
+#include "FOGLContainer.h"
 #include "FOGLRenderContext.h"
 
 static FOGLResourceManager resMgr;
@@ -16,7 +18,7 @@ FOGLWidget::FOGLWidget(const std::string& name): m_windowName(name) {
 }
 
 FOGLWidget::~FOGLWidget() {
-
+    FOGLApplication::instance().unregisterRoot(this);
 }
 
 void FOGLWidget::resignTopLevelWindow()  {
@@ -32,13 +34,11 @@ void FOGLWidget::resignTopLevelWindow()  {
     // 2️⃣ 修改状态
     m_windowRole = FOGLWindowRole::None;
 
-    // 3️⃣ 子 Widget 不做处理，它们仍然保留 parent 指针
-    // 如果需要，把 m_registerTopLevel 置空
-    m_registerTopLevel = nullptr;
 }
 
 void FOGLWidget::close() {
     if (m_windowRole == FOGLWindowRole::TopLevel) {
+        FOGLApplication::instance().unregisterRoot(this);
         glfwSetWindowShouldClose(m_window, GLFW_TRUE);
         if (m_window)
             glfwDestroyWindow(m_window);
@@ -96,13 +96,19 @@ void FOGLWidget::becomeTopLevelWindow(int width, int height,bool transparentFram
     // ✅ 现在 OpenGL 上下文有效，可以初始化 ctx
     m_ctx.init(width,height);  // 这里安全调用 glEnable/glBlendFunc 等
 
+    m_parent = nullptr;
     m_windowRole = FOGLWindowRole::TopLevel;
+
+    FOGLApplication::instance().registerRoot(this);
 }
 
 void FOGLWidget::setGeometry(float x, float y, float w, float h) {
-
-
      m_rect = {x, y, w, h};
+    updateOffset();
+}
+
+void FOGLWidget::setGeometry(FOGLRect rect) {
+    m_rect = rect;
     updateOffset();
 }
 
@@ -118,27 +124,9 @@ void FOGLWidget::updateOffset() {
 
 void FOGLWidget::addChild(std::shared_ptr<FOGLWidget> child) {
     child->m_parent = this;
-    // 继承注册回调
-    child->m_registerTopLevel = m_registerTopLevel;
 
     m_children.push_back(child);
     updateOffset();
-}
-
-void FOGLWidget::setTopLevelRegisterFunc(WindowRegisterFunc func) {
-    m_registerTopLevel = std::move(func);
-}
-
-void FOGLWidget::createNewTopLevelWindow(std::string title)  {
-    this->m_parent = nullptr;
-    if (title.empty())
-        title = m_windowName;
-    auto w = std::make_shared<FOGLWidget>(title);
-    w->becomeTopLevelWindow();
-
-    if (m_registerTopLevel) {
-        m_registerTopLevel(w); // 通知 Application
-    }
 }
 
 void FOGLWidget::attachChildren(std::vector<std::shared_ptr<FOGLWidget>> children,bool asTopLevel) {
@@ -161,9 +149,24 @@ std::vector<std::shared_ptr<FOGLWidget>> FOGLWidget::detachChildren() {
     return std::move(m_children);
 }
 
+void FOGLWidget::setContainer(const std::shared_ptr<FOGLContainer>& container) {
+    if (container) {
+        container->setGeometry(0,0,m_rect.width,m_rect.height);
+        addChild(std::shared_ptr<FOGLWidget>(container));
+    }
+}
+
 bool FOGLWidget::contains(float px, float py) const {
     return px >= m_rect.x && px <= m_rect.x + m_rect.width &&
            py >= m_rect.y && py <= m_rect.y + m_rect.height;
+}
+
+void FOGLWidget::hide() {
+    m_visible = false;
+}
+
+void FOGLWidget::show() {
+    m_visible = true;
 }
 
 void FOGLWidget::render() {
@@ -172,7 +175,7 @@ void FOGLWidget::render() {
     auto it = m_children.begin();
     for (int i=0; i<m_children.size(); i++) {
         auto & w = *it;
-        if (!(*it)->m_parent) {
+        if ((*it)->m_windowRole == FOGLWindowRole::TopLevel ||!(*it)->m_parent) {
             m_children.erase(it);
         }else
             ++it;
@@ -191,12 +194,18 @@ void FOGLWidget::render() {
     // double mouseX, mouseY;
     // glfwGetCursorPos(m_window, &mouseX, &mouseY);
     // int leftAction = glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_LEFT);
+    onLayout();
     onPaint(m_ctx);
 }
 
 bool FOGLWidget::processMouseEvent(double mouseX, double mouseY, int button, int action) {
 
     return false;
+}
+
+void FOGLWidget::onLayout() {
+     for (auto& c : m_children)
+         c->onLayout();
 }
 
 void FOGLWidget::onPaint(FOGLRenderContext &ctx) {
@@ -211,7 +220,7 @@ void FOGLWidget::onPaint(FOGLRenderContext &ctx) {
     m_pendingBringToFront.clear();
 
     for (auto child : m_children) {
-        if (child->isVisible()) {
+        if (child->visible()) {
             child->onPaint(m_ctx);
         }
     }
@@ -243,15 +252,19 @@ bool FOGLWidget::onMouseEvent(const MouseEvent &e) {
         auto child = *it;
         if (!child->m_visible) continue;
 
-        if (child->contains(e.x, e.y)) {
-            MouseEvent me = e;
-            me.x -= m_rect.x;
-            me.y -= m_rect.y;
+        MouseEvent me = e;
+        me.x -= m_rect.x;
+        me.y -= m_rect.y;
+        if (child->contains(me.x, me.y)) {
+
             if (child->onMouseEvent(me)) {  // 递归调用
                 handleMouseEventFlag = handleSelfMouseEvent(me);
                 if (!handleMouseEventFlag) {
                     break;
                 }
+            }else {
+                handleMouseEventFlag = false;
+                break;
             }
             childToBringFront = child;
             break;

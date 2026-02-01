@@ -15,7 +15,7 @@ public:
         float xOffset = 0, yOffset = 0;
         int col = 0;
         for (auto& child :  parent->children()) {
-            if (!child->isVisible()) continue;
+            if (!child->visible()) continue;
 
             FOGLRect geo = child->geometry();
             child->setGeometry(xOffset, yOffset, geo.width, geo.height);

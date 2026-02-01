@@ -43,10 +43,11 @@ public:
 
     bool handleSelfMouseEvent(const MouseEvent& e) override {
         if (e.button == MouseButton::Left && e.action == MouseAction::Press) {
-            if (m_clickEvent) m_clickEvent();
-            return true; // 事件被消耗
+            if (m_clickEvent)
+                m_clickEvent();
+            return false; // 事件被消耗
         }
-        return false;
+        return true;
     }
 
 private:

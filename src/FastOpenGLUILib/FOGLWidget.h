@@ -13,6 +13,8 @@
 
 #include "FOGLResourceManager.h"
 #include <GLFW/glfw3.h>
+class FOGLContainer;
+
 struct FOGLRect { float x, y, width, height; };
 enum class MouseButton { Left, Right, Middle, Other };
 enum class MouseAction { Press, Release, Move, Scroll };
@@ -46,33 +48,35 @@ class FOGLResourceManager;
 
 class FOGLWidget :public std::enable_shared_from_this<FOGLWidget>{//shared_from_this()可以共享自己的this指针
 public:
-    using WindowRegisterFunc = std::function<void(std::shared_ptr<FOGLWidget>)>;
-
     FOGLWidget(const std::string& name = "");
     virtual ~FOGLWidget();
 
+    // 判断是否为真实glfwwindow窗口，None为窗口内嵌的组件
     bool isTopLevel() const { return m_windowRole == FOGLWindowRole::TopLevel; }
 
-     // ✅ 添加 getter
+     // 获取glfwwindow窗口指针，如果是窗口组件，该值为父窗口值
     GLFWwindow* getGLFWwindowPointer() { return m_window; }
 
     void resignTopLevelWindow();
 
+    // 关闭窗口
     void close();
 
+    // 组件提升为glfw窗口，转移原chlid数据， render函数调用后整理旧的”空窗口“
     void becomeTopLevelWindow(int width = 600, int height = 400,bool transparentFrameBuffer = true, bool decorated = false);
 
+    // 设置窗口位置，宽高
     void setGeometry(float x, float y, float w, float h);
 
+    void setGeometry(FOGLRect rect);
+    // 更新偏移值，供子窗口渲染判断位置
     void updateOffset();
 
+    // 获取窗口位置宽高
     [[nodiscard]] const FOGLRect& geometry() const { return m_rect; }
 
+    // 将子窗口挂着到当前窗口下（ 暂时为处理FOGLWidget为顶层窗口时挂在情况 ）
     void addChild(std::shared_ptr<FOGLWidget> child);
-
-    void setTopLevelRegisterFunc(WindowRegisterFunc func);
-
-    void createNewTopLevelWindow(std::string title = "");
 
     //TODO: 待功能完成后补全attachChildren detachChildren
     void attachChildren(std::vector<std::shared_ptr<FOGLWidget>> children,bool asTopLevel = false);
@@ -80,6 +84,9 @@ public:
     std::vector<std::shared_ptr<FOGLWidget>> detachChildren();   // 取走，但不破坏结构
 
     [[nodiscard]] FOGLWidget* parent() const { return m_parent; }
+
+    //设置填充控件，不需要在调用addChild
+    void setContainer(const std::shared_ptr<FOGLContainer>& container);
 
     void setFocus(bool focus) { m_focused = focus; }
     bool hasFocus() const { return m_focused; }
@@ -89,7 +96,7 @@ public:
         if (m_parent)
             m_parent->setDirty();
     }
-    [[nodiscard]] bool isVisible() const {return m_visible;}
+    [[nodiscard]] bool visible() const {return m_visible;}
 
     [[nodiscard]] const std::vector<std::shared_ptr<FOGLWidget>>& children() const { return m_children; }
 
@@ -110,6 +117,10 @@ public:
         }
     }
 
+    virtual void hide();
+
+    virtual void show();
+
     virtual void onFocusIn() {}
     virtual void onFocusOut() {}
 
@@ -123,10 +134,13 @@ public:
     virtual bool processMouseEvent(double mouseX, double mouseY, int button, int action);
 
     virtual void onInit() {}
-    virtual void onLayout() { for (auto& c : m_children) c->onLayout(); }
+    virtual void onLayout();
     virtual void onPaint(FOGLRenderContext& ctx);
+
+    //返回值为true,事件继续传递，否则外层不再传递
     virtual bool handleSelfMouseEvent(const MouseEvent& e);
 
+    //返回值为true,事件继续传递，否则外层不再传递
     bool onMouseEvent(const MouseEvent& e);
 protected:
     FOGLRect m_rect{};
@@ -143,12 +157,11 @@ protected:
 
     GLFWwindow* m_nativeWindow = nullptr; // 仅 TopLevel 有效
 
-    WindowRegisterFunc m_registerTopLevel = nullptr;
-
     static FOGLRenderContext m_ctx; // 延迟初始化
 
     std::shared_ptr<FOGLWidget> m_focusChild;
 private:
+    // 用来判断是否还需要处理窗口事件
     bool m_eventListen =true;
 
     std::string m_windowName;
