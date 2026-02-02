@@ -39,15 +39,15 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     auto root = std::make_shared<FOGLWidget>("Root Window");
     root->becomeTopLevelWindow();
 
-    FOGLWidget widget("test");
-    widget.becomeTopLevelWindow();
+    // FOGLWidget widget("test");
+    // widget.becomeTopLevelWindow();
 
-    // 添加子 Widget
-    auto child = std::make_shared<FOGLWidget>("Child Widget");
-    root->addChild(child);
+    // // 添加子 Widget
+    // auto child = std::make_shared<FOGLWidget>("Child Widget");
+    // root->addChild(child);
 
     // 子 Widget 创建新的顶层窗口
-    child->becomeTopLevelWindow();
+    // child->becomeTopLevelWindow();
 
     // 创建子窗口
     auto subWin = std::make_shared<FOGLSubWindow>("Demo SubWindow");
@@ -64,9 +64,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     // 创建按钮
     auto button = std::make_shared<FOGLButton>("Click Me");
     button->setGeometry(10, 10, 120, 40);
+    button->setRadius(200);
     button->setClickEvent([]() {
         std::cout << "Button clicked!\n";
     });
+    button->setHoverTexture("./wallhaven-p9gmlj.jpg");
 
     // 挂到容器
     container->addChild(button);
@@ -74,6 +76,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     // 把容器挂到子窗口
     subWin->setContainer(container);
 
+    subWin->setGeometry(0,0,500,300);
     // 把子窗口挂到 UI 根节点
     root->addChild(subWin);
 

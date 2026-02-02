@@ -13,6 +13,7 @@ add_library(${PROJECT_NAME} STATIC
         FOGLGridLayout.cpp
         FOGLButton.cpp
         FOGLApplication.cpp
+        FOGLContainer.cpp
         glad.c
 )
 

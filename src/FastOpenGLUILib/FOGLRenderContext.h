@@ -23,17 +23,17 @@ public:
     void init(int width, int height);
 
     // 绘制纯色矩形
-    void drawRect(float x, float y, float w, float h, const glm::vec4& color);
+    void drawRect(float x, float y, float w, float h, const glm::vec4& color,float radius = 0.0f);
 
     // 绘制纹理（使用资源管理器获取）
-    void drawTexture(const std::string& path, float x, float y, float w, float h);
+    void drawTexture(const std::string& path, float x, float y, float w, float h,float radius = 0.0f);
 
-    void drawTexture(int rcID, float x, float y, float w, float h);
+    void drawTexture(int rcID, float x, float y, float w, float h,float radius = 0.0f);
 
 private:
     int m_width = 0, m_height = 0;
-    GLuint m_colorProgram = 0, m_vao = 0, m_vbo = 0;
-    GLuint m_textureProgram = 0, m_vaoTex = 0, m_vboTex = 0;
+    GLuint m_colorProgram = 0, m_vao = 0, m_vbo = 0 ,m_ebo = 0;
+    // GLuint m_textureProgram = 0, m_vaoTex = 0, m_vboTex = 0;
 
     bool initStatus = false;
 
@@ -43,7 +43,7 @@ private:
     std::unordered_map<int, GLuint> m_textureCacheRC;
 
     // 内部绘制纹理（已有纹理ID）
-    void drawTexture(GLuint tex, float x, float y, float w, float h);
+    void drawTexture(GLuint tex, float x, float y, float w, float h,float radius,const glm::vec4& color={},bool useTexture = true);
 
     // 获取纹理
     GLuint getTexture(const std::string& path);

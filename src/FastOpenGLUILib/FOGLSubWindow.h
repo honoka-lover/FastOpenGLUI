@@ -20,7 +20,7 @@ public:
         // 绘制子控件
         FOGLWidget::onPaint(ctx); }
 
-    bool handleSelfMouseEvent(const MouseEvent& e) override;
+    void handleSelfMouseEvent(const MouseEvent& e) override;
 private:
     bool hitTest(float x, float y) const { return x >= m_rect.x && x <= m_rect.x+m_rect.width && y >= m_rect.y && y <= m_rect.y+m_rect.height; }
     std::string m_title;

@@ -21,35 +21,19 @@ public:
     void setHoverColor(const glm::vec4& color) { m_hoverColor = color; }
     void setClickEvent(std::function<void()> cb) { m_clickEvent = std::move(cb); }
 
-    bool processMouseEvent(double x, double y, int button, int action) override {
-        for (auto it = m_children.rbegin(); it != m_children.rend(); ++it) {
-            if ((*it)->processMouseEvent(x, y, button, action)) return true;
-        }
-        return false;
-    }
+    void setHoverTexture(const std::string& texture);
 
-    void setTexture(const std::string& name) {
-        // auto data = FOGLResourceSystem::loadBinary(name);
-        // if (data.empty()) return;
-        // // TODO: 可以用 stbi_load_from_memory 上传纹理
-        // // 这里给个占位
-    }
+    void setTexture(const std::string& name);
 
-    void onPaint(FOGLRenderContext& ctx) override {
-        glm::vec4 color = m_hovered ? m_hoverColor : m_color;
-        ctx.drawRect(m_rect.x+m_xOffset, m_rect.y+m_yOffset, m_rect.width, m_rect.height, color);
-        FOGLWidget::onPaint(ctx);
-    }
+    void setHoverTextureResource(int textureResourceId){ m_textureResourceIdHover = textureResourceId; }
 
-    bool handleSelfMouseEvent(const MouseEvent& e) override {
-        if (e.button == MouseButton::Left && e.action == MouseAction::Press) {
-            if (m_clickEvent)
-                m_clickEvent();
-            return false; // 事件被消耗
-        }
-        return true;
-    }
+    void setTextureResource(int textureResourceId) { m_textureResourceId = textureResourceId; }
 
+    void onPaint(FOGLRenderContext& ctx) override;
+
+    void handleSelfMouseEvent(const MouseEvent& e) override;
+
+    bool onMouseEvent(const MouseEvent &e) override;
 private:
     std::function<void()> m_clickEvent;
     bool hitTest(float x, float y) const {
@@ -61,8 +45,12 @@ private:
     glm::vec4 m_color = glm::vec4(0.2f, 0.2f, 0.8f, 1.0f);
     glm::vec4 m_hoverColor = glm::vec4(0.4f, 0.4f, 1.0f, 1.0f);
 
-    bool m_hovered = false;
     bool m_pressed = false;
+
+    std::string m_texture{};
+    std::string m_textureHover{};
+    int m_textureResourceId = 0;
+    int m_textureResourceIdHover = 0;
 };
 
 

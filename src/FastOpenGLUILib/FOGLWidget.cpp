@@ -10,15 +10,19 @@
 #include "FOGLRenderContext.h"
 
 static FOGLResourceManager resMgr;
-FOGLRenderContext FOGLWidget::m_ctx(resMgr);
 
-FOGLWidget::FOGLWidget(const std::string& name): m_windowName(name) {
+FOGLWidget::FOGLWidget(const std::string& name): m_windowName(name)
+{
 
 
 }
 
 FOGLWidget::~FOGLWidget() {
     FOGLApplication::instance().unregisterRoot(this);
+    if (m_ctx) {
+        delete m_ctx;
+        m_ctx = nullptr;
+    }
 }
 
 void FOGLWidget::resignTopLevelWindow()  {
@@ -93,8 +97,11 @@ void FOGLWidget::becomeTopLevelWindow(int width, int height,bool transparentFram
         throw std::runtime_error("Failed to initialize GLAD");
     }
 
+    if (m_ctx)
+        delete m_ctx;
+    m_ctx = new FOGLRenderContext(resMgr);
     // ✅ 现在 OpenGL 上下文有效，可以初始化 ctx
-    m_ctx.init(width,height);  // 这里安全调用 glEnable/glBlendFunc 等
+    m_ctx->init(width,height);  // 这里安全调用 glEnable/glBlendFunc 等
 
     m_parent = nullptr;
     m_windowRole = FOGLWindowRole::TopLevel;
@@ -105,6 +112,8 @@ void FOGLWidget::becomeTopLevelWindow(int width, int height,bool transparentFram
 void FOGLWidget::setGeometry(float x, float y, float w, float h) {
      m_rect = {x, y, w, h};
     updateOffset();
+    if (m_ctx &&m_windowRole != FOGLWindowRole::TopLevel)
+        m_ctx->init(w,h);
 }
 
 void FOGLWidget::setGeometry(FOGLRect rect) {
@@ -195,12 +204,7 @@ void FOGLWidget::render() {
     // glfwGetCursorPos(m_window, &mouseX, &mouseY);
     // int leftAction = glfwGetMouseButton(m_window, GLFW_MOUSE_BUTTON_LEFT);
     onLayout();
-    onPaint(m_ctx);
-}
-
-bool FOGLWidget::processMouseEvent(double mouseX, double mouseY, int button, int action) {
-
-    return false;
+    onPaint(*m_ctx);
 }
 
 void FOGLWidget::onLayout() {
@@ -209,42 +213,62 @@ void FOGLWidget::onLayout() {
 }
 
 void FOGLWidget::onPaint(FOGLRenderContext &ctx) {
-    // 先统一提升 Z-order
-    for (auto& w : m_pendingBringToFront) {
-        auto it = std::find(m_children.begin(), m_children.end(), w);
-        if (it != m_children.end()) {
-            m_children.erase(it);
-            m_children.push_back(w); // Z-order 最前
-        }
-    }
-    m_pendingBringToFront.clear();
 
     for (auto child : m_children) {
         if (child->visible()) {
-            child->onPaint(m_ctx);
+            child->onPaint(ctx);
         }
     }
 }
 
-bool FOGLWidget::handleSelfMouseEvent(const MouseEvent &e) {
-    if (e.action == MouseAction::Press)
-        std::cout << "handleSelfMouseEvent"  << " " << e.x << " " << e.y << std::endl;
+void FOGLWidget::handleSelfMouseEvent(const MouseEvent &e) {
 
-    return true;
+}
+
+void  FOGLWidget::handleScrollEvent(const MouseEvent &e) {
+
+}
+
+void FOGLWidget::onTextInput(const TextEvent &e) {
+}
+
+void FOGLWidget::onKeyEvent(const KeyEvent &e) {
+}
+
+bool FOGLWidget::onScrollEvent(const MouseEvent& e) {
+    bool handleScrollEventFlag = true;
+    for (auto it = m_children.rbegin(); it != m_children.rend(); ++it) {
+        auto child = *it;
+        if (!child->m_visible) continue;
+        if (!child->onScrollEvent(e)) {
+            handleScrollEventFlag = false;
+        }
+    }
+    if (handleScrollEventFlag) {
+        handleScrollEvent(e);
+    }
+    return handleScrollEventFlag;
+}
+
+bool FOGLWidget::onMoveEvent(const MouseEvent &e) {
+    bool handleMoveEventFlag = true;
+    for (auto it = m_children.rbegin(); it != m_children.rend(); ++it) {
+        const auto& child = *it;
+        if (!child->m_visible) continue;
+        if (!child->onMoveEvent(e)) {
+            handleMoveEventFlag = false;
+        }
+    }
+    if (handleMoveEventFlag) {
+        m_hovered = contains(e.x,e.y);
+    }
+    return handleMoveEventFlag;
 }
 
 bool FOGLWidget::onMouseEvent(const MouseEvent &e) {
     bool handleMouseEventFlag = true;
     if (!this->m_visible || !m_eventListen) {
         return handleMouseEventFlag;
-    }
-    std::shared_ptr<FOGLWidget> childToBringFront = nullptr;
-
-    if (!contains(e.x, e.y))
-        return handleMouseEventFlag;
-
-    if (m_children.empty()) {
-        return handleSelfMouseEvent(e);
     }
 
     // 倒序遍历子 Widget（Z-order 最前先处理）
@@ -256,24 +280,14 @@ bool FOGLWidget::onMouseEvent(const MouseEvent &e) {
         me.x -= m_rect.x;
         me.y -= m_rect.y;
         if (child->contains(me.x, me.y)) {
-
-            if (child->onMouseEvent(me)) {  // 递归调用
-                handleMouseEventFlag = handleSelfMouseEvent(me);
-                if (!handleMouseEventFlag) {
-                    break;
-                }
-            }else {
+            if (!child->onMouseEvent(me)) {  // 递归调用
                 handleMouseEventFlag = false;
-                break;
             }
-            childToBringFront = child;
-            break;
         }
     }
 
-    if (childToBringFront) {
-        setFocusChild(childToBringFront);
+    if (handleMouseEventFlag) {
+        handleScrollEvent(e);
     }
-
     return handleMouseEventFlag;
 }

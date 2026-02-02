@@ -5,7 +5,7 @@ project(FastOpenGLUI)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 include(cmake/dependencies.cmake)
 
 include_directories(
@@ -23,4 +23,4 @@ add_subdirectory(src/UninstallWindow)
 add_subdirectory(src/imguiSample)
 add_subdirectory(src/demo)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
+

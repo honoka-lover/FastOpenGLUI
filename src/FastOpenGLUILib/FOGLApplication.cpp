@@ -73,7 +73,7 @@ void mouseButtonMoveCallback(GLFWwindow* handle, double x,double y) {
     MouseEvent e{};
     e.x = x; e.y = y;
     e.action = MouseAction::Move;
-    w->onMouseEvent(e);
+    w->onMoveEvent(e);
 }
 
 void mouseButtonScrollCallback(GLFWwindow* handle, double x,double y) {
@@ -85,14 +85,54 @@ void mouseButtonScrollCallback(GLFWwindow* handle, double x,double y) {
     MouseEvent e{};
     e.x = x; e.y = y;
     e.action = MouseAction::Scroll;
-    w->onMouseEvent(e);
+    w->onScrollEvent(e);
 }
+
+void keyCallback(GLFWwindow* window,
+                 int key,
+                 int scancode,
+                 int action,
+                 int mods)
+{
+    auto it = g_windowMap.find(window);
+    if (it == g_windowMap.end()) return;
+    auto w = it->second;
+
+    KeyEvent e{};
+    e.key = key;
+    e.scancode = scancode;
+    e.mods = static_cast<KeyMod>(mods);
+
+    switch (action) {
+        case GLFW_PRESS:   e.action = KeyAction::Press;   break;
+        case GLFW_RELEASE: e.action = KeyAction::Release; break;
+        case GLFW_REPEAT:  e.action = KeyAction::Repeat;  break;
+        default: ;
+    }
+
+    w->onKeyEvent(e);
+}
+
+void charCallback(GLFWwindow* window, unsigned int codepoint)
+{
+    auto it = g_windowMap.find(window);
+    if (it == g_windowMap.end()) return;
+    auto w = it->second;
+
+    TextEvent e{};
+    e.codepoint = codepoint; // Unicode
+    w->onTextInput(e);
+}
+
 
 void registerEvents(FOGLWidget *w) {
     g_windowMap[w->getGLFWwindowPointer()]=w;
     glfwSetMouseButtonCallback(w->getGLFWwindowPointer(), mouseButtonCallback);
     glfwSetCursorPosCallback(w->getGLFWwindowPointer(), mouseButtonMoveCallback);
-    glfwSetScrollCallback(w->getGLFWwindowPointer(), mouseButtonMoveCallback);
+    glfwSetScrollCallback(w->getGLFWwindowPointer(), mouseButtonScrollCallback);
+    glfwSetKeyCallback(w->getGLFWwindowPointer(), keyCallback);
+    glfwSetCharCallback(w->getGLFWwindowPointer(), charCallback);
+
 }
 
 void FOGLApplication::updateRoot() {

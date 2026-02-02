@@ -13,7 +13,38 @@
 
 #include "FOGLResourceManager.h"
 #include <GLFW/glfw3.h>
+
+#include "FOGLRenderContext.h"
 class FOGLContainer;
+
+enum class KeyAction {
+    Press,
+    Release,
+    Repeat
+};
+
+enum KeyMod : uint32_t {
+    Mod_None   = 0,
+    Mod_Shift  = GLFW_MOD_SHIFT,
+    Mod_Ctrl   = GLFW_MOD_CONTROL,
+    Mod_Alt    = GLFW_MOD_ALT,
+    Mod_Super  = GLFW_MOD_SUPER
+};
+
+struct KeyEvent {
+    int   key        = -1;
+    int       scancode   = 0;
+    KeyAction action     = KeyAction::Press;
+    KeyMod    mods       = Mod_None;
+
+    bool pressed()  const { return action == KeyAction::Press; }
+    bool released() const { return action == KeyAction::Release; }
+    bool repeat()   const { return action == KeyAction::Repeat; }
+};
+
+struct TextEvent {
+    uint32_t codepoint = 0; // Unicode code point (UTF-32)
+};
 
 struct FOGLRect { float x, y, width, height; };
 enum class MouseButton { Left, Right, Middle, Other };
@@ -67,8 +98,9 @@ public:
 
     // 设置窗口位置，宽高
     void setGeometry(float x, float y, float w, float h);
-
     void setGeometry(FOGLRect rect);
+
+    void setRadius(float radius){ m_radius = radius; }
     // 更新偏移值，供子窗口渲染判断位置
     void updateOffset();
 
@@ -130,36 +162,44 @@ public:
     bool wantsBringToFront() const { return m_bringToFront; }
     void setBringToFrontFlag(bool flag) { m_bringToFront = flag; }
 
-    // 鼠标事件接口（子类实现）
-    virtual bool processMouseEvent(double mouseX, double mouseY, int button, int action);
-
     virtual void onInit() {}
     virtual void onLayout();
     virtual void onPaint(FOGLRenderContext& ctx);
 
     //返回值为true,事件继续传递，否则外层不再传递
-    virtual bool handleSelfMouseEvent(const MouseEvent& e);
+    virtual void handleSelfMouseEvent(const MouseEvent& e);
+
+    virtual void handleScrollEvent(const MouseEvent& e);
+
+    virtual void onTextInput(const TextEvent& e);
+
+    virtual void onKeyEvent(const KeyEvent &e);
+
+    virtual bool onScrollEvent(const MouseEvent& e);
+
+    virtual bool onMoveEvent(const MouseEvent& e);
 
     //返回值为true,事件继续传递，否则外层不再传递
-    bool onMouseEvent(const MouseEvent& e);
+    virtual bool onMouseEvent(const MouseEvent& e);
 protected:
     FOGLRect m_rect{};
+    float m_radius = 0.0f;
     float m_xOffset = 0.0;
     float m_yOffset = 0.0;
     FOGLWidget* m_parent = nullptr;
     std::vector<std::shared_ptr<FOGLWidget>> m_children;
     bool m_visible = true;
     bool m_dirty = true;
+    bool m_hovered = false;
     bool m_focused = false;
-    bool m_bringToFront = false;  // 点击后是否希望提升到最上层
+    // 是否希望提升到最上层
+    bool m_bringToFront = false;
 
     FOGLWindowRole m_windowRole = FOGLWindowRole::None;
 
     GLFWwindow* m_nativeWindow = nullptr; // 仅 TopLevel 有效
 
-    static FOGLRenderContext m_ctx; // 延迟初始化
-
-    std::shared_ptr<FOGLWidget> m_focusChild;
+    FOGLRenderContext *m_ctx = nullptr; // 延迟初始化
 private:
     // 用来判断是否还需要处理窗口事件
     bool m_eventListen =true;
@@ -170,22 +210,6 @@ private:
 
     // 待提升的子 Widget（bringToFront 队列）
     std::vector<std::shared_ptr<FOGLWidget>> m_pendingBringToFront;
-
-    // 仅在渲染或事件递归结束后调用
-    void setFocusChild(std::shared_ptr<FOGLWidget> child) {
-        if (m_focusChild == child) return;
-
-        // 之前的失去焦点
-        if (m_focusChild) m_focusChild->onFocusOut();
-
-        m_focusChild = child;
-
-        // 新的获得焦点
-        if (m_focusChild) m_focusChild->onFocusIn();
-
-        // 标记 Z-order 提升
-        if (child) m_pendingBringToFront.push_back(child);
-    }
 };
 
 
