@@ -10,6 +10,16 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
+#include "FOGLFont.h"
+
+struct GlyphInstance {
+    glm::vec2 position;
+    glm::vec2 size;
+    glm::vec2 uv0;
+    glm::vec2 uv1;
+    glm::vec4 color;
+};
+
 // 前置声明资源管理器
 class FOGLResourceManager;
 // 简单渲染上下文，用于 UI 绘制
@@ -30,10 +40,17 @@ public:
 
     void drawTexture(int rcID, float x, float y, float w, float h,float radius = 0.0f);
 
+    void drawGlyphInstances(GLuint atlasTex, const std::vector<GlyphInstance>& instances) const;
+
+    void drawAtlasDebug(GLuint atlasTex, float x, float y, float w, float h);
 private:
     int m_width = 0, m_height = 0;
     GLuint m_colorProgram = 0, m_vao = 0, m_vbo = 0 ,m_ebo = 0;
-    // GLuint m_textureProgram = 0, m_vaoTex = 0, m_vboTex = 0;
+
+    GLuint m_textProgram = 0;
+    GLuint m_textVAO = 0;
+    GLuint m_textQuadVBO = 0;
+    GLuint m_textInstanceVBO = 0;
 
     bool initStatus = false;
 
@@ -53,6 +70,8 @@ private:
     void setupColorProgram();
 
     void setupTextureProgram();
+
+    void setupTextProgram();
 };
 
 

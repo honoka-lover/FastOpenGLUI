@@ -13,8 +13,7 @@ static FOGLResourceManager resMgr;
 
 FOGLWidget::FOGLWidget(const std::string& name): m_windowName(name)
 {
-
-
+    setGeometry(0,0,0,0);
 }
 
 FOGLWidget::~FOGLWidget() {

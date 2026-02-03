@@ -9,8 +9,9 @@
 #include "FOGLSubWindow.h"
 #include "FOGLButton.h"
 #include "FOGLContainer.h"
+#include "FOGLTextWidget.h"
 #include "FOGLVBoxLayout.h"
-
+#include "FOGLFunction.h"
 void attachToConsoleIfAvailable()
 {
 #ifdef _WIN32
@@ -32,6 +33,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 #ifdef _WIN32
     attachToConsoleIfAvailable();  // 尝试附加到现有控制台
 #endif
+    std::locale::global(std::locale("en_US.UTF-8"));
     // 创建应用
     FOGLApplication::instance().init();
 
@@ -70,13 +72,22 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     });
     button->setHoverTexture("./wallhaven-p9gmlj.jpg");
 
+    auto textWidget = std::make_shared<FOGLTextWidget>();
+    textWidget->setGeometry(0, 0, 600, 400);
+    textWidget->setText(wcharToUtf8(L"你好"));
+    // textWidget->becomeTopLevelWindow();
+    button->addChild(textWidget);
+    // textWidget->setColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
+    // auto button1 = std::make_shared<FOGLButton>("Click Me");
+    // button1->becomeTopLevelWindow();
     // 挂到容器
     container->addChild(button);
+    // container->becomeTopLevelWindow();
 
     // 把容器挂到子窗口
     subWin->setContainer(container);
 
-    subWin->setGeometry(0,0,500,300);
+    subWin->setGeometry(0,0,600,400);
     // 把子窗口挂到 UI 根节点
     root->addChild(subWin);
 

@@ -134,20 +134,7 @@ public:
 
     bool contains(float px, float py) const;
 
-    void raise() {
-        if (!m_parent) return;
-
-        auto& siblings = m_parent->m_children;
-        auto it = std::find_if(
-            siblings.begin(), siblings.end(),
-            [&](auto& p) { return p.get() == this; }
-        );
-        if (it != siblings.end()) {
-            auto self = *it;
-            siblings.erase(it);
-            siblings.push_back(self);
-        }
-    }
+    void resize(float w,float h) { setGeometry(m_rect.x,m_rect.y,w,h); }
 
     virtual void hide();
 

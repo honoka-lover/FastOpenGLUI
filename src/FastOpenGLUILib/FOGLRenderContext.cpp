@@ -5,7 +5,8 @@
 #include "FOGLRenderContext.h"
 
 #include "FOGLResourceManager.h"
-
+#include "FOGLFunction.h"
+#include "glm/gtc/type_ptr.inl"
 // 简单 Shader 工具
 static GLuint compileShader(GLenum type, const char* source) {
     GLuint shader = glCreateShader(type);
@@ -66,6 +67,7 @@ void FOGLRenderContext::init(int width, int height) {
 
     setupColorProgram();
     // setupTextureProgram();
+    setupTextProgram();
     initStatus = true;
 }
 
@@ -81,6 +83,42 @@ void FOGLRenderContext::drawTexture(const std::string &path, float x, float y, f
 void FOGLRenderContext::drawTexture(int rcID, float x, float y, float w, float h,float radius) {
     GLuint tex = getTexture(rcID);
     if (tex != 0) drawTexture(tex, x, y, w, h,radius);
+}
+
+void FOGLRenderContext::drawGlyphInstances(GLuint atlasTex, const std::vector<GlyphInstance>& instances) const {
+    if (instances.empty()) return;
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glUseProgram(m_textProgram);
+    glBindVertexArray(m_textVAO);
+
+    auto m_projection = glm::ortho(0.0f, (float)600,
+                             (float)400, 0.0f,  // Y 轴向下
+                             -1.0f, 1.0f);
+    // 设置投影矩阵
+    GLint projLoc = glGetUniformLocation(m_textProgram, "u_projection");
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(m_projection));
+
+    // 绑定纹理
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, atlasTex);
+    glUniform1i(glGetUniformLocation(m_textProgram, "u_texture"), 0);
+
+    // 上传实例数据
+    glBindBuffer(GL_ARRAY_BUFFER, m_textInstanceVBO);
+    glBufferData(GL_ARRAY_BUFFER,
+                 instances.size() * sizeof(GlyphInstance),
+                 instances.data(),
+                 GL_DYNAMIC_DRAW);
+
+    // 实例化绘制
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, (GLsizei)instances.size());
+
+    glBindVertexArray(0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_BLEND);
 }
 
 void FOGLRenderContext::drawTexture(GLuint tex, float x, float y, float w, float h,float radius,const glm::vec4& color,bool useTexture) {
@@ -236,3 +274,102 @@ void FOGLRenderContext::setupColorProgram() {
 void FOGLRenderContext::setupTextureProgram() {
     setupColorProgram();
 }
+
+void FOGLRenderContext::setupTextProgram() {
+    // ===== 创建着色器 =====
+    const char* vertexShaderSource = R"(
+        #version 330 core
+        layout(location = 0) in vec2 a_vertex; // (0,0) (1,0) (0,1) (1,1)
+
+        layout(location = 1) in vec2 a_position;  // 实例：位置
+        layout(location = 2) in vec2 a_size;      // 实例：尺寸
+        layout(location = 3) in vec2 a_uv0;       // 实例：UV0
+        layout(location = 4) in vec2 a_uv1;       // 实例：UV1
+        layout(location = 5) in vec4 a_color;     // 实例：颜色
+
+        uniform mat4 u_projection;
+        out vec2 v_texCoord;
+        out vec4 v_color;
+
+        void main() {
+            vec2 pos = a_position + a_vertex * a_size;
+            gl_Position = u_projection * vec4(pos, 0.0, 1.0);
+
+            v_texCoord = mix(a_uv0, a_uv1, a_vertex);
+            v_color = a_color;
+        }
+    )";
+
+    const char* fragmentShaderSource = R"(
+        #version 330 core
+        in vec2 v_texCoord;
+        in vec4 v_color;
+        out vec4 fragColor;
+
+        uniform sampler2D u_texture;
+
+        void main() {
+            float alpha = texture(u_texture, v_texCoord).a;
+            fragColor = vec4(v_color.rgb, v_color.a * alpha);
+        }
+    )";
+
+    // 编译着色器...
+    m_textProgram = createProgram(vertexShaderSource, fragmentShaderSource);
+
+    // ===== 创建 VAO/VBO =====
+    glGenVertexArrays(1, &m_textVAO);
+    glBindVertexArray(m_textVAO);
+
+    // 顶点数据 (quad 的 4 个角)
+    float quadVertices[] = {
+        0.0f, 0.0f,  // 左下
+        1.0f, 0.0f,  // 右下
+        0.0f, 1.0f,  // 左上
+        1.0f, 1.0f   // 右上
+    };
+
+    GLuint quadVBO;
+    glGenBuffers(1, &quadVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+
+    // 实例数据 VBO
+    glGenBuffers(1, &m_textInstanceVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, m_textInstanceVBO);
+
+    // 属性 1: position
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphInstance), (void*)offsetof(GlyphInstance, position));
+    glVertexAttribDivisor(1, 1);
+
+    // 属性 2: size
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphInstance), (void*)offsetof(GlyphInstance, size));
+    glVertexAttribDivisor(2, 1);
+
+    // 属性 3: uv0
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphInstance), (void*)offsetof(GlyphInstance, uv0));
+    glVertexAttribDivisor(3, 1);
+
+    // 属性 4: uv1
+    glEnableVertexAttribArray(4);
+    glVertexAttribPointer(4, 2, GL_FLOAT, GL_FALSE, sizeof(GlyphInstance), (void*)offsetof(GlyphInstance, uv1));
+    glVertexAttribDivisor(4, 1);
+
+    // 属性 5: color
+    glEnableVertexAttribArray(5);
+    glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(GlyphInstance), (void*)offsetof(GlyphInstance, color));
+    glVertexAttribDivisor(5, 1);
+
+    glBindVertexArray(0);
+}
+
+// 调试用：直接把字体 atlas 显示到屏幕上
+void FOGLRenderContext::drawAtlasDebug(GLuint atlasTex, float x, float y, float w, float h) {
+    drawTexture(atlasTex, x, y, w, h,0,glm::vec4(0,0,0,0));
+}
+

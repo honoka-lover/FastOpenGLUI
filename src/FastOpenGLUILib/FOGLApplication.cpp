@@ -4,6 +4,7 @@
 
 #include "FOGLApplication.h"
 
+#include <chrono>
 #include <iostream>
 
 FOGLApplication& FOGLApplication::instance() {
@@ -124,6 +125,15 @@ void charCallback(GLFWwindow* window, unsigned int codepoint)
     w->onTextInput(e);
 }
 
+void window_size_callback(GLFWwindow* window, int width, int height) {
+    auto it = g_windowMap.find(window);
+    if (it == g_windowMap.end()) return;
+    auto w = it->second;
+    w->resize(width,height);
+    // 更新 OpenGL viewport
+    glViewport(0, 0, width, height);
+}
+
 
 void registerEvents(FOGLWidget *w) {
     g_windowMap[w->getGLFWwindowPointer()]=w;
@@ -132,6 +142,8 @@ void registerEvents(FOGLWidget *w) {
     glfwSetScrollCallback(w->getGLFWwindowPointer(), mouseButtonScrollCallback);
     glfwSetKeyCallback(w->getGLFWwindowPointer(), keyCallback);
     glfwSetCharCallback(w->getGLFWwindowPointer(), charCallback);
+    // 设置回调
+    glfwSetWindowSizeCallback(w->getGLFWwindowPointer(), window_size_callback);
 
 }
 
@@ -170,6 +182,9 @@ void FOGLApplication::updateRoot() {
 
 
 void FOGLApplication::run() {
+    using Clock = std::chrono::high_resolution_clock;
+    auto start = Clock::now();
+    int count = 0;
    do {
        updateRoot();
        // 遍历所有窗口
@@ -195,6 +210,16 @@ void FOGLApplication::run() {
        }
 
        glfwPollEvents(); // 全局事件轮询
+
+       count++;
+
+       auto now = Clock::now();
+       std::chrono::duration<double> elapsed = now - start;
+       if (elapsed.count() >= 1.0) { // 每秒输出一次
+           std::cout << "Loops per second: " << count << std::endl;
+           count = 0;
+           start = now;
+       }
    }while (!m_roots.empty() || !m_pendingAdd.empty());
 
 
