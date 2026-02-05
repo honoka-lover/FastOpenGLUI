@@ -56,7 +56,7 @@ bool FOGLFont::loadFromFile(const std::string& ttfPath, int pixelHeight) {
 
     FT_Set_Pixel_Sizes(face, 0, pixelHeight);
     m_pixelHeight = pixelHeight;
-
+    m_basePixelSize = pixelHeight;
     // 存储字体度量
     m_lineHeight = face->size->metrics.height >> 6;
     m_ascent = face->size->metrics.ascender >> 6;

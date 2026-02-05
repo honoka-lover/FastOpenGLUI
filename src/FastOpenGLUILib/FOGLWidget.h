@@ -134,7 +134,7 @@ public:
 
     bool contains(float px, float py) const;
 
-    void resize(float w,float h) { setGeometry(m_rect.x,m_rect.y,w,h); }
+    void resize(float w,float h) ;
 
     virtual void hide();
 

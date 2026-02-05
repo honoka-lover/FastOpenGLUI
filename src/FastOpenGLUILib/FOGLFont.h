@@ -66,6 +66,8 @@ public:
     float getLineHeight() const { return m_lineHeight; }
 
     void preloadCommonChars() ;
+
+    [[nodiscard]] int getBasePixelSize() const { return m_basePixelSize; }
 private:
     void initFont();
     void cleanup();
@@ -81,6 +83,7 @@ private:
     int m_pixelHeight{0};
     // 默认字形（用于缺失字符）
     FOGLGlyph m_defaultGlyph;
+    int m_basePixelSize = 0;   // ★ 新增：字体生成时的像素高度
 };
 
 

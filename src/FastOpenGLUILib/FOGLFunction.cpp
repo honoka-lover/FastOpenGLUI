@@ -113,6 +113,26 @@ std::string wcharToUtf8(const wchar_t* wideString) {
     return utf8String;
 }
 
+//ansi转u8
+std::string ansiToUtf8(const char* ansi) {
+    if (!ansi) return "";
+
+    // ANSI -> UTF-16
+    int wlen = MultiByteToWideChar(CP_ACP, 0, ansi, -1, nullptr, 0);
+    if (wlen <= 0) return "";
+
+    std::wstring wstr(wlen - 1, L'\0');
+    MultiByteToWideChar(CP_ACP, 0, ansi, -1, &wstr[0], wlen);
+
+    // UTF-16 -> UTF-8
+    int u8len = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    if (u8len <= 0) return "";
+
+    std::string u8(u8len - 1, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), -1, &u8[0], u8len, nullptr, nullptr);
+
+    return u8;
+}
 
 std::filesystem::path selectFolderUsingIFileDialog(const std::filesystem::path& defaultFolder) {
     HRESULT hr = CoInitialize(nullptr);  // 初始化 COM
@@ -439,6 +459,47 @@ void extract_7z_UseBit7z(int rc7zId,const fs::path &archive_path, const fs::path
     }
 }
 
+std::vector<uint32_t> utf8_to_codepoints(const std::u8string& utf8) {
+    std::vector<uint32_t> codepoints;
+    size_t i = 0;
+
+    while (i < utf8.size()) {
+        uint8_t c = static_cast<uint8_t>(utf8[i]);
+        uint32_t cp = 0;
+        size_t bytes = 0;
+
+        if ((c & 0x80) == 0) {            // 1-byte
+            cp = c;
+            bytes = 1;
+        } else if ((c & 0xE0) == 0xC0) {  // 2-byte
+            cp = c & 0x1F;
+            bytes = 2;
+        } else if ((c & 0xF0) == 0xE0) {  // 3-byte
+            cp = c & 0x0F;
+            bytes = 3;
+        } else if ((c & 0xF8) == 0xF0) {  // 4-byte
+            cp = c & 0x07;
+            bytes = 4;
+        } else {
+            // 非法 UTF-8 起始字节
+            ++i;
+            continue;
+        }
+
+        if (i + bytes > utf8.size()) break;
+
+        for (size_t j = 1; j < bytes; ++j) {
+            uint8_t cc = static_cast<uint8_t>(utf8[i + j]);
+            cp = (cp << 6) | (cc & 0x3F);
+        }
+
+        codepoints.push_back(cp);
+        i += bytes;
+    }
+
+    return codepoints;
+}
+
 // 简单 UTF-8 解码函数
 std::vector<uint32_t> utf8_to_codepoints(const std::string& utf8) {
     std::vector<uint32_t> codepoints;
@@ -475,6 +536,47 @@ std::vector<uint32_t> utf8_to_codepoints(const std::string& utf8) {
         codepoints.push_back(cp);
         i += bytes;
     }
+    return codepoints;
+}
+
+std::vector<uint32_t> utf8_to_codepoints(std::span<const char8_t> utf8) {
+    std::vector<uint32_t> codepoints;
+    size_t i = 0;
+
+    while (i < utf8.size()) {
+        uint8_t c = utf8[i];
+        uint32_t cp = 0;
+        size_t bytes = 0;
+
+        if ((c & 0x80) == 0) {           // 1-byte
+            cp = c;
+            bytes = 1;
+        } else if ((c & 0xE0) == 0xC0) { // 2-byte
+            cp = c & 0x1F;
+            bytes = 2;
+        } else if ((c & 0xF0) == 0xE0) { // 3-byte
+            cp = c & 0x0F;
+            bytes = 3;
+        } else if ((c & 0xF8) == 0xF0) { // 4-byte
+            cp = c & 0x07;
+            bytes = 4;
+        } else {
+            // 非法 UTF-8，跳过
+            i++;
+            continue;
+        }
+
+        if (i + bytes > utf8.size()) break; // 防溢出
+
+        for (size_t j = 1; j < bytes; j++) {
+            cp <<= 6;
+            cp |= (utf8[i + j] & 0x3F);
+        }
+
+        codepoints.push_back(cp);
+        i += bytes;
+    }
+
     return codepoints;
 }
 

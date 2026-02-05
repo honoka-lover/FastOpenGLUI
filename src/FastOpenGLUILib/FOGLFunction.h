@@ -9,6 +9,7 @@
 #include <vector>
 #include <cstdint>
 #include <filesystem>
+#include <span>
 
 #include "glm/vec4.hpp"
 
@@ -18,8 +19,9 @@ struct TextFragment {
 };
 
 // 简单 UTF-8 解码函数
+std::vector<uint32_t> utf8_to_codepoints(const std::u8string& utf8);
 std::vector<uint32_t> utf8_to_codepoints(const std::string& utf8);
-
+std::vector<uint32_t> utf8_to_codepoints(std::span<const char8_t> utf8);
 std::vector<TextFragment> parseShellColor(const std::string& s);
 
 // 确保目标目录存在
@@ -33,6 +35,9 @@ void Extract7zResourceWithProgress(int rc7zId,int resourcesId,const std::filesys
 
 // 辅助函数：将宽字符（wchar_t）转换为 UTF-8
 std::string wcharToUtf8(const wchar_t* wideString);
+
+//ansi转u8
+std::string ansiToUtf8(const char* ansi);
 
 // 将字符串颜色转换为 glm::vec4
 glm::vec4 colorStringToVec4(const std::string& color);

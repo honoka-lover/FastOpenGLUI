@@ -68,6 +68,9 @@ void FOGLRenderContext::init(int width, int height) {
     setupColorProgram();
     // setupTextureProgram();
     setupTextProgram();
+    m_projection = glm::ortho(0.0f, (float)m_width,
+                             (float)m_height, 0.0f,  // Y 轴向下
+                             -1.0f, 1.0f);
     initStatus = true;
 }
 
@@ -94,9 +97,6 @@ void FOGLRenderContext::drawGlyphInstances(GLuint atlasTex, const std::vector<Gl
     glUseProgram(m_textProgram);
     glBindVertexArray(m_textVAO);
 
-    auto m_projection = glm::ortho(0.0f, (float)600,
-                             (float)400, 0.0f,  // Y 轴向下
-                             -1.0f, 1.0f);
     // 设置投影矩阵
     GLint projLoc = glGetUniformLocation(m_textProgram, "u_projection");
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(m_projection));
@@ -126,7 +126,6 @@ void FOGLRenderContext::drawTexture(GLuint tex, float x, float y, float w, float
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
-    glm::mat4 mvp = glm::ortho(-1.0f, 1.0f, -1.0f, 1.f, -1.f, 1.f);
     glUseProgram(m_colorProgram);
 
     float vertices[] = {
@@ -151,7 +150,7 @@ void FOGLRenderContext::drawTexture(GLuint tex, float x, float y, float w, float
 
     glUniform2f(glGetUniformLocation(m_colorProgram, "pos"), x, y);
 
-    glUniformMatrix4fv(glGetUniformLocation(m_colorProgram, "projection"), 1, GL_FALSE, &mvp[0][0]);
+    glUniformMatrix4fv(glGetUniformLocation(m_colorProgram, "projection"), 1, GL_FALSE, &m_projection[0][0]);
     glUniform4fv(glGetUniformLocation(m_colorProgram, "buttonColor"), 1, &color[0]);
 
     if (useTexture)
@@ -181,22 +180,20 @@ GLuint FOGLRenderContext::getTexture(int rcID) {
 void FOGLRenderContext::setupColorProgram() {
     const char* vs = R"(
             #version 330 core
-                layout (location = 0) in vec2 aPos;
-                layout (location = 1) in vec2 aTexCoord;
+            layout (location = 0) in vec2 aPos;      // 像素坐标
+            layout (location = 1) in vec2 aTexCoord;
 
-                out vec2 TexCoords;
-                out vec2 TextCoords;
-                // 片段着色器源码
-                uniform vec2 screenSize; // 屏幕尺寸
-                uniform mat4 projection;
-                void main() {
-                    // 将屏幕坐标转换为 NDC 坐标
-                    vec2 ndcPos = vec2(2.0 * aPos.x / screenSize.x - 1.0, 1.0 - 2.0 * aPos.y / screenSize.y);
-                    // 将 NDC 坐标转换为 [0.0, 1.0] 范围的纹理坐标
-                    TexCoords = aPos;
-                    TextCoords = aTexCoord;
-                    gl_Position = projection*vec4(ndcPos, 0.0, 1.0);
-                }
+            out vec2 TexCoords;
+            out vec2 TextCoords;
+
+            uniform mat4 projection;
+
+            void main() {
+                TexCoords  = aPos;        // 如果你后面逻辑要用“像素”
+                TextCoords = aTexCoord;   // [0,1] 纹理坐标
+
+                gl_Position = projection * vec4(aPos, 0.0, 1.0);
+            }
         )";
 
     const char* fs = R"(
@@ -372,4 +369,13 @@ void FOGLRenderContext::setupTextProgram() {
 void FOGLRenderContext::drawAtlasDebug(GLuint atlasTex, float x, float y, float w, float h) {
     drawTexture(atlasTex, x, y, w, h,0,glm::vec4(0,0,0,0));
 }
+
+void FOGLRenderContext::updateWindowGeometry(int width, int height) {
+    m_width = width;
+    m_height = height;
+    m_projection = glm::ortho(0.0f, (float)m_width,
+                             (float)m_height, 0.0f,  // Y 轴向下
+                             -1.0f, 1.0f);
+}
+
 

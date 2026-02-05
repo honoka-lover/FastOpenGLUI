@@ -43,10 +43,12 @@ public:
     void drawGlyphInstances(GLuint atlasTex, const std::vector<GlyphInstance>& instances) const;
 
     void drawAtlasDebug(GLuint atlasTex, float x, float y, float w, float h);
-private:
-    int m_width = 0, m_height = 0;
-    GLuint m_colorProgram = 0, m_vao = 0, m_vbo = 0 ,m_ebo = 0;
 
+    void updateWindowGeometry(int width,int height);
+private:
+    int m_width = 600, m_height = 400;
+    GLuint m_colorProgram = 0, m_vao = 0, m_vbo = 0 ,m_ebo = 0;
+    glm::mat4 m_projection = glm::mat4(1.0f);
     GLuint m_textProgram = 0;
     GLuint m_textVAO = 0;
     GLuint m_textQuadVBO = 0;

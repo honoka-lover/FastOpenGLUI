@@ -169,6 +169,13 @@ bool FOGLWidget::contains(float px, float py) const {
            py >= m_rect.y && py <= m_rect.y + m_rect.height;
 }
 
+void FOGLWidget::resize(float w, float h) {
+    if (m_windowRole == FOGLWindowRole::TopLevel && m_ctx) {
+        m_ctx->updateWindowGeometry(w,h);
+    }
+    setGeometry(m_rect.x,m_rect.y,w,h);
+}
+
 void FOGLWidget::hide() {
     m_visible = false;
 }
@@ -212,7 +219,8 @@ void FOGLWidget::onLayout() {
 }
 
 void FOGLWidget::onPaint(FOGLRenderContext &ctx) {
-
+    if (!m_visible)
+        return;
     for (auto child : m_children) {
         if (child->visible()) {
             child->onPaint(ctx);
