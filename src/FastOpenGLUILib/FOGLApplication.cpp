@@ -181,7 +181,7 @@ void FOGLApplication::updateRoot() {
 
 
 
-void FOGLApplication::run() {
+void FOGLApplication::exec() {
     using Clock = std::chrono::high_resolution_clock;
     auto start = Clock::now();
     int count = 0;
@@ -220,6 +220,10 @@ void FOGLApplication::run() {
            count = 0;
            start = now;
        }
+
+       //避免单窗口时不清理上次绘制，绘制结束后清除一次，保证glfw和opengl正常初始化
+       glClearColor(0.0f, 0.0f, 0.0f, 0.0f); // 设置清除颜色为透明
+       glClear(GL_COLOR_BUFFER_BIT);
    }while (!m_roots.empty() || !m_pendingAdd.empty());
 
 

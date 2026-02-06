@@ -97,8 +97,8 @@ public:
     void becomeTopLevelWindow(int width = 600, int height = 400,bool transparentFrameBuffer = true, bool decorated = false);
 
     // 设置窗口位置，宽高
-    void setGeometry(float x, float y, float w, float h);
-    void setGeometry(FOGLRect rect);
+    virtual void setGeometry(float x, float y, float w, float h);
+    virtual void setGeometry(FOGLRect rect);
 
     void setRadius(float radius){ m_radius = radius; }
     // 更新偏移值，供子窗口渲染判断位置
@@ -134,7 +134,7 @@ public:
 
     bool contains(float px, float py) const;
 
-    void resize(float w,float h) ;
+    virtual void resize(float w,float h) ;
 
     virtual void hide();
 
@@ -152,11 +152,6 @@ public:
     virtual void onInit() {}
     virtual void onLayout();
     virtual void onPaint(FOGLRenderContext& ctx);
-
-    //返回值为true,事件继续传递，否则外层不再传递
-    virtual void handleSelfMouseEvent(const MouseEvent& e);
-
-    virtual void handleScrollEvent(const MouseEvent& e);
 
     virtual void onTextInput(const TextEvent& e);
 

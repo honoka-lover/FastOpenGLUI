@@ -580,23 +580,23 @@ std::vector<uint32_t> utf8_to_codepoints(std::span<const char8_t> utf8) {
     return codepoints;
 }
 
-inline std::vector<TextFragment> parseShellColor(const std::string& s) {
-    std::vector<TextFragment> out;
-    glm::vec4 cur{1,1,1,1};
-    std::string buf;
-
-    for (size_t i=0;i<s.size();) {
-        if (s[i]=='\x1b' && s[i+1]=='[') {
-            if (!buf.empty()) out.push_back({buf,cur}), buf.clear();
-            i+=2;
-            int code = 0;
-            while (isdigit(s[i])) code = code*10 + (s[i++]-'0');
-            i++; // m
-            if (code==31) cur={1,0,0,1};
-            else if (code==32) cur={0,1,0,1};
-            else if (code==0) cur={1,1,1,1};
-        } else buf+=s[i++];
-    }
-    if (!buf.empty()) out.push_back({buf,cur});
-    return out;
-}
+// inline std::vector<TextFragment> parseShellColor(const std::string& s) {
+//     std::vector<TextFragment> out;
+//     glm::vec4 cur{1,1,1,1};
+//     std::string buf;
+//
+//     for (size_t i=0;i<s.size();) {
+//         if (s[i]=='\x1b' && s[i+1]=='[') {
+//             if (!buf.empty()) out.push_back({buf,cur}), buf.clear();
+//             i+=2;
+//             int code = 0;
+//             while (isdigit(s[i])) code = code*10 + (s[i++]-'0');
+//             i++; // m
+//             if (code==31) cur={1,0,0,1};
+//             else if (code==32) cur={0,1,0,1};
+//             else if (code==0) cur={1,1,1,1};
+//         } else buf+=s[i++];
+//     }
+//     if (!buf.empty()) out.push_back({buf,cur});
+//     return out;
+// }

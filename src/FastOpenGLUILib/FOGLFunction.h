@@ -13,16 +13,16 @@
 
 #include "glm/vec4.hpp"
 
-struct TextFragment {
-    std::string text;
-    glm::vec4 color;
-};
+// struct TextFragment {
+//     std::string text;
+//     glm::vec4 color;
+// };
 
 // 简单 UTF-8 解码函数
 std::vector<uint32_t> utf8_to_codepoints(const std::u8string& utf8);
 std::vector<uint32_t> utf8_to_codepoints(const std::string& utf8);
 std::vector<uint32_t> utf8_to_codepoints(std::span<const char8_t> utf8);
-std::vector<TextFragment> parseShellColor(const std::string& s);
+// std::vector<TextFragment> parseShellColor(const std::string& s);
 
 // 确保目标目录存在
 bool EnsureDirectoryExists(const std::filesystem::path& directoryPath);

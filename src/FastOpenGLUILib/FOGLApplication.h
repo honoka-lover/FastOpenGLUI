@@ -18,7 +18,7 @@ public:
     void unregisterRoot(FOGLWidget* root);
 
 
-    void run();
+    void exec();
 
     // 禁止拷贝 / 赋值
     FOGLApplication(const FOGLApplication&) = delete;

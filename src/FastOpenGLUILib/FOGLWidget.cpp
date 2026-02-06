@@ -118,6 +118,8 @@ void FOGLWidget::setGeometry(float x, float y, float w, float h) {
 void FOGLWidget::setGeometry(FOGLRect rect) {
     m_rect = rect;
     updateOffset();
+    if (m_ctx &&m_windowRole != FOGLWindowRole::TopLevel)
+        m_ctx->init(m_rect.width,m_rect.height);
 }
 
 void FOGLWidget::updateOffset() {
@@ -228,18 +230,20 @@ void FOGLWidget::onPaint(FOGLRenderContext &ctx) {
     }
 }
 
-void FOGLWidget::handleSelfMouseEvent(const MouseEvent &e) {
-
-}
-
-void  FOGLWidget::handleScrollEvent(const MouseEvent &e) {
-
-}
-
 void FOGLWidget::onTextInput(const TextEvent &e) {
+    for (auto it = m_children.rbegin(); it != m_children.rend(); ++it) {
+        auto child = *it;
+        if (!child->m_visible) continue;
+        child->onTextInput(e);
+    }
 }
 
 void FOGLWidget::onKeyEvent(const KeyEvent &e) {
+    for (auto it = m_children.rbegin(); it != m_children.rend(); ++it) {
+        auto child = *it;
+        if (!child->m_visible) continue;
+        child->onKeyEvent(e);
+    }
 }
 
 bool FOGLWidget::onScrollEvent(const MouseEvent& e) {
@@ -250,9 +254,6 @@ bool FOGLWidget::onScrollEvent(const MouseEvent& e) {
         if (!child->onScrollEvent(e)) {
             handleScrollEventFlag = false;
         }
-    }
-    if (handleScrollEventFlag) {
-        handleScrollEvent(e);
     }
     return handleScrollEventFlag;
 }
@@ -291,10 +292,6 @@ bool FOGLWidget::onMouseEvent(const MouseEvent &e) {
                 handleMouseEventFlag = false;
             }
         }
-    }
-
-    if (handleMouseEventFlag) {
-        handleScrollEvent(e);
     }
     return handleMouseEventFlag;
 }

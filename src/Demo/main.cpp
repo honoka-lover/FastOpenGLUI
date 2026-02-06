@@ -36,13 +36,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 #ifdef _WIN32
     attachToConsoleIfAvailable();  // 尝试附加到现有控制台
 #endif
-    // std::locale::global(std::locale("en_US.UTF-8"));
     // 创建应用
     FOGLApplication::instance().init();
 
     // 创建根窗口
     auto root = std::make_shared<FOGLWidget>("Root Window");
-    root->becomeTopLevelWindow();
+    // root->becomeTopLevelWindow();
 
     // FOGLWidget widget("test");
     // widget.becomeTopLevelWindow();
@@ -75,13 +74,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     });
     button->setHoverTexture("./wallhaven-p9gmlj.jpg");
 
-    auto textWidget = std::make_shared<FOGLTextEditWidget>();
-    textWidget->setGeometry(0, 0, 600, 400);
-    const char *test = "hello world";
-    textWidget->setText(L"你好");
-    textWidget->setFontSize(60);
-    // textWidget->becomeTopLevelWindow();
-    button->addChild(textWidget);
+
     // textWidget->setColor(glm::vec4(1.0f, 0.0f, 0.0f, 0.0f));
     // auto button1 = std::make_shared<FOGLButton>("Click Me");
     // button1->becomeTopLevelWindow();
@@ -96,8 +89,33 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
     // 把子窗口挂到 UI 根节点
     root->addChild(subWin);
 
+    // 3️⃣ 创建编辑器
+    auto editor = std::make_shared<FOGLTextEditWidget>("My Editor");
+    // editor->resize(300,200);
+    editor->setGeometry(0,0,600,400);
+    // 4️⃣ 设置为顶层窗口
+    editor->becomeTopLevelWindow(800, 600);
+
+    // 5️⃣ 配置编辑器
+    editor->setFontSize(30.0f);        // 字体大小
+    // editor->setWordWrap(true);         // 自动换行
+
+    // 6️⃣ 添加一些文本
+    editor->setText(u8"Hello, World!\nStart editing...");
+
+    // 7️⃣ 或者添加富文本
+    std::vector<TextFragment> fragments = {
+        {"Welcome ", {1.0f, 1.0f, 1.0f, 1.0f}},      // 白色
+        {"to ", {0.5f, 0.5f, 1.0f, 1.0f}},           // 蓝色
+        {"FOGLTextEditWidget!", {1.0f, 0.5f, 0.0f, 1.0f}} // 橙色
+    };
+    // editor->setRichTextFragments(fragments);
+    button->addChild(editor);
+
+    glfwSwapInterval(0);   // 关闭垂直同步
+
     // 运行应用
-    FOGLApplication::instance().run();
+    FOGLApplication::instance().exec();
 
     return 0;
 }

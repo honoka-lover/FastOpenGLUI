@@ -25,15 +25,15 @@ public:
 
     FOGLTextWidget(const std::string& name = "",Encoding enc= Encoding::UTF8);
 
-    void setText(const char* str);
-    void setText(const wchar_t* str);
-    void setText(std::string_view str);               // 字符串字面量 / std::string
-    void setText(std::wstring_view str);
-    void setText(std::span<const char> str);
-    void setText(std::span<const wchar_t> str);
-    void setText(std::span<const char16_t> data);
-    void setText(std::span<const char32_t> data);
-    void setText(std::span<const char8_t> str);
+    virtual void setText(const char* str);
+    virtual void setText(const wchar_t* str);
+    // void setText(std::string_view str);               // 字符串字面量 / std::string
+    // void setText(std::wstring_view str);
+    virtual void setText(std::span<const char> str);
+    virtual void setText(std::span<const wchar_t> str);
+    virtual void setText(std::span<const char16_t> data);
+    virtual void setText(std::span<const char32_t> data);
+    virtual void setText(std::span<const char8_t> str);
     // void setText(std::u32string_view text,
     //          std::span<const TextColorRun> runs,
     //          const glm::vec4& defaultColor);

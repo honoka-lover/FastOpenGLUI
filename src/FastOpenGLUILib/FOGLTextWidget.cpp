@@ -75,14 +75,14 @@ void FOGLTextWidget::setText(const wchar_t *str) {
     setText(std::span<const wchar_t>{str, len});
 }
 
-void FOGLTextWidget::setText(std::string_view str) {
-    // 转为 span<const char>
-    setText(std::span<const char>{str.data(), str.size()});
-}
+// void FOGLTextWidget::setText(std::string_view str) {
+//     // 转为 span<const char>
+//     setText(std::span<const char>{str.data(), str.size()});
+// }
 
-void FOGLTextWidget::setText(std::wstring_view str) {
-    setText(std::span<const wchar_t>{str.data(), str.size()});
-}
+// void FOGLTextWidget::setText(std::wstring_view str) {
+//     setText(std::span<const wchar_t>{str.data(), str.size()});
+// }
 
 void FOGLTextWidget::setText(std::span<const wchar_t> str) {
     m_codepoints.clear();

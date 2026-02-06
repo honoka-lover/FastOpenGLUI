@@ -35,10 +35,3 @@
 //     return false;
 // }
 
-void FOGLSubWindow::handleSelfMouseEvent(const MouseEvent &e) {
-    if (e.action == MouseAction::Press) {
-        std::cout<<"test";
-    }
-
-    return FOGLWidget::handleSelfMouseEvent(e);
-}

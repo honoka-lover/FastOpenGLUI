@@ -31,8 +31,6 @@ public:
 
     void onPaint(FOGLRenderContext& ctx) override;
 
-    void handleSelfMouseEvent(const MouseEvent& e) override;
-
     bool onMouseEvent(const MouseEvent &e) override;
 private:
     std::function<void()> m_clickEvent;

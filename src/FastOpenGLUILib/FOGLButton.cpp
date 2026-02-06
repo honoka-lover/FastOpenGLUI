@@ -43,14 +43,11 @@ void FOGLButton::onPaint(FOGLRenderContext &ctx) {
     FOGLWidget::onPaint(ctx);
 }
 
-void FOGLButton::handleSelfMouseEvent(const MouseEvent &e) {
+bool FOGLButton::onMouseEvent(const MouseEvent &e) {
+    FOGLWidget::onMouseEvent(e);
     if (e.button == MouseButton::Left && e.action == MouseAction::Press) {
         if (m_clickEvent)
             m_clickEvent();
     }
-}
-
-bool FOGLButton::onMouseEvent(const MouseEvent &e) {
-    handleSelfMouseEvent(e);
     return false;
 }
