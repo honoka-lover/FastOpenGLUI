@@ -18,9 +18,5 @@ include_directories(
 
 add_subdirectory(src/FOGLLib)
 add_subdirectory(src/FastOpenGLUILib)
-add_subdirectory(src/InstallWindow)
-add_subdirectory(src/UninstallWindow)
-add_subdirectory(src/imguiSample)
-add_subdirectory(src/demo)
-
+add_subdirectory(src/Example)
 

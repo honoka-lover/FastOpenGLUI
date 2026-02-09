@@ -1,0 +1,4 @@
+add_subdirectory(Terminal)
+add_subdirectory(Demo)
+add_subdirectory(InstallWindow)
+add_subdirectory(UninstallWindow)
